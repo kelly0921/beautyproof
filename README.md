@@ -40,10 +40,11 @@ The default judge path takes nine clicks and has no external-service dependency.
 
 ## Local setup
 
-```bash
-cd apps/beautyproof
-npm install --workspaces=false
-copy .env.example .env.local
+```powershell
+git clone https://github.com/kelly0921/beautyproof.git
+cd beautyproof
+npm install
+Copy-Item .env.example .env.local
 npm run dev
 ```
 
@@ -80,7 +81,7 @@ CameraKit is represented by a local `hdskincare` adapter and becomes active when
 
 The production schema and idempotent product/demo seed records are in `supabase/migrations/0001_beautyproof.sql`. The server repository automatically activates after the Supabase URL and secret key are configured. RLS is enabled with no browser table policies; all access stays behind validated server routes.
 
-Follow [`docs/setup-supabase-vercel.md`](docs/setup-supabase-vercel.md) for the exact dashboard, local verification, YouCam, and Vercel steps. After configuration, verify durable access with:
+Follow [`docs/setup-cloudflare-workers.md`](docs/setup-cloudflare-workers.md) for the exact dashboard, local verification, YouCam, and Cloudflare Workers steps. After configuration, verify durable access with:
 
 ```bash
 npm run check:persistence
@@ -141,10 +142,19 @@ Prototype aggregates contain real YouCam-generated records and synthetic demonst
 - Evidence-quality and verdict thresholds are prototype heuristics, not medical or clinical standards.
 - Inconclusive is a supported result.
 
-## Deployment
+## Cloudflare Workers deployment
 
-Deploy `apps/beautyproof` as the project root on Vercel or another Next-compatible host. Add server secrets in the platform environment, apply the Supabase migration, and verify `/api/health` plus `/demo` on the exact recording browser. The cached-real path remains the recommended judging fallback.
+BeautyProof is configured for Cloudflare Workers through `@opennextjs/cloudflare`. The checked-in `wrangler.jsonc` enables the Node.js compatibility required by the Next.js server bundle, public outbound fetches for Supabase and YouCam, static assets, a self-service binding, and Workers observability. Secrets remain outside source control.
 
-This workspace is not currently linked to a Vercel project. The remaining external deployment step is to create or link a Vercel project with `apps/beautyproof` as its root, add the desired environment values, deploy, and run `npm run test:e2e` against the production URL.
+Useful local commands:
+
+```bash
+npm run build:cloudflare
+npm run preview:cloudflare
+npm run cf:dry-run
+npm run deploy:cloudflare
+```
+
+The GitHub repository should be connected to a Worker named `beautyproof` with `npm run build:cloudflare` as the build command and `npx wrangler deploy --keep-vars` as the deploy command. Add the Supabase and YouCam credentials as encrypted runtime secrets, then verify `/api/health`, `/app`, and `/demo` from a signed-out browser. Follow [`docs/setup-cloudflare-workers.md`](docs/setup-cloudflare-workers.md) for the exact dashboard steps.
 
 Beauty reviews should not begin with stars. They should begin with a baseline.

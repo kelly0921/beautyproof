@@ -9,5 +9,8 @@ playwright-report/
 .env
 .env.local
 .env.*.local
+.dev.vars
 
 .vercel/
+.open-next/
+.wrangler/
