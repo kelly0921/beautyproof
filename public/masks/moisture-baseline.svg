@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600" role="img" aria-label="Abstract moisture observation mask">
+  <defs><radialGradient id="a"><stop offset="0" stop-color="#b8d8cd" stop-opacity=".9"/><stop offset="1" stop-color="#6e2d50" stop-opacity="0"/></radialGradient></defs>
+  <rect width="480" height="600" fill="#eee5dd"/><ellipse cx="240" cy="300" rx="150" ry="220" fill="#d9c8c5"/><circle cx="175" cy="265" r="105" fill="url(#a)"/><circle cx="310" cy="325" r="115" fill="url(#a)"/><path d="M158 430Q240 480 322 430" fill="none" stroke="#6e2d50" stroke-opacity=".35" stroke-width="5"/>
+</svg>

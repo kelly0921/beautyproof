@@ -1,0 +1,16 @@
+{
+  "status": 200,
+  "data": {
+    "task_status": "success",
+    "results": {
+      "output": [
+        { "type": "hd_moisture", "ui_score": 71, "raw_score": 54.2, "mask_urls": ["/masks/moisture-baseline.svg"] },
+        { "type": "hd_redness", "ui_score": 67, "raw_score": 46.8, "mask_urls": [] },
+        { "type": "hd_texture", "ui_score": 76, "raw_score": 61.4, "mask_urls": [] },
+        { "type": "hd_oiliness", "ui_score": 73, "raw_score": 48.6, "mask_urls": [] }
+      ]
+    }
+  },
+  "fixture_origin": "cached_real_youcam",
+  "fixture_note": "Sanitized demonstration fixture; no face image or personal identifier is stored."
+}
