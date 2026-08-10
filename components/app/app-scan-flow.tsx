@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { AnalysisOrigin, MetricVector, SkinAnalysis } from "@/lib/domain";
+import { analysisOriginLabel } from "@/lib/provenance";
 
 interface AnalysisPayload {
   ok: boolean;
@@ -28,7 +29,7 @@ export function AppScanFlow() {
   async function analyze(mode: "upload" | "demo") {
     if (!consent) return;
     setStatus("analyzing");
-    setMessage(mode === "upload" ? "Sending your image through the protected YouCam workflow…" : "Loading a sanitized cached-real YouCam example…");
+    setMessage(mode === "upload" ? "Sending your image through the protected YouCam workflow…" : "Loading a simulated YouCam-format example…");
     try {
       let response: Response;
       if (mode === "demo") {
@@ -86,7 +87,7 @@ export function AppScanFlow() {
     return (
       <div className="app-screen app-scan-screen">
         <div className="app-flow-steps" aria-label="ProofWindow setup progress"><span className="complete">1</span><i /><span className="complete">2</span><i /><span>3</span></div>
-        <section className="app-result-hero"><span className="app-success-mark">✓</span><p className="app-kicker">Baseline saved</p><h1>Your starting skin is mapped.</h1><p>These are YouCam raw scores for comparison—not a diagnosis or beauty grade.</p><span className="app-origin-badge"><i />{analysis.origin === "live_youcam" ? "Live YouCam Skin AI v2.1" : "Cached-real YouCam example"}</span></section>
+        <section className="app-result-hero"><span className="app-success-mark">✓</span><p className="app-kicker">Baseline saved</p><h1>Your starting skin is mapped.</h1><p>{analysis.origin === "synthetic" ? "These are simulated YouCam-format scores for demonstrating the workflow—not measurements from a real person." : "These are YouCam raw scores for comparison—not a diagnosis or beauty grade."}</p><span className="app-origin-badge"><i />{analysisOriginLabel(analysis.origin)}</span></section>
         <div className="app-metric-list">{metricOrder.map((metric) => <div className="app-metric-row" key={metric}><div><span>{metricNames[metric]}</span><small>raw score</small></div><strong>{metrics[metric].toFixed(1)}</strong><div className="app-metric-track"><i style={{ width: `${Math.max(4, Math.min(100, metrics[metric]))}%` }} /></div></div>)}</div>
         <section className="app-plan-preview"><div><p className="app-kicker">Selected proof lens</p><h2>Visible hydration in 14 days</h2><p>DewSignal Adaptive Serum · 2026 US Formula</p></div><div className="app-plan-days"><span><strong>0</strong>Baseline</span><i /><span><strong>7</strong>Check-in</span><i /><span><strong>14</strong>Follow-up</span></div></section>
         <button className="app-primary-action app-full-action" disabled={status === "starting"} onClick={startWindow} type="button">{status === "starting" ? "Starting your trial…" : "Start my 14-day ProofWindow"}<span>→</span></button>
@@ -99,7 +100,7 @@ export function AppScanFlow() {
     <div className="app-screen app-scan-screen">
       <div className="app-flow-steps" aria-label="ProofWindow setup progress"><span className="complete">1</span><i /><span>2</span><i /><span>3</span></div>
       <header className="app-page-heading"><p className="app-kicker">New baseline</p><h1>Start with a clear picture.</h1><p>One front-facing image establishes the comparison point for this formula and claim.</p></header>
-      <section className="app-selected-product"><div className="app-product-thumbnail"><i /></div><div><span>Aster Vale</span><strong>DewSignal Adaptive Serum</strong><small>2026 US Formula · hydration lens</small></div><span className="app-selected-check">✓</span></section>
+      <section className="app-selected-product"><div className="app-product-thumbnail"><i /></div><div><span>Aster Vale · fictional demo brand</span><strong>DewSignal Adaptive Serum</strong><small>2026 US Formula · hydration lens</small></div><span className="app-selected-check">✓</span></section>
       <section className="app-capture-card">
         <div className="app-face-guide" aria-hidden="true"><div className="app-face-oval"><span>Keep your face centered</span></div><span className="app-light-hint">☼ Even light · no filters</span></div>
         <div className="app-capture-controls">
@@ -107,7 +108,7 @@ export function AppScanFlow() {
           <label className="app-file-picker"><input accept="image/jpeg,image/png" capture="user" onChange={(event) => setFile(event.target.files?.[0] ?? null)} type="file" /><span>{file ? "Photo selected" : "Use camera or photo library"}</span><strong>{file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB` : "Choose image"}</strong></label>
           <label className="app-consent-row"><input checked={consent} onChange={(event) => setConsent(event.target.checked)} type="checkbox" /><span><strong>I consent to this skin analysis.</strong> The image is sent to YouCam for processing; BeautyProof stores numeric observations and provenance, not the face image.</span></label>
           <button className="app-primary-action app-full-action" disabled={!consent || !file || status === "analyzing"} onClick={() => analyze("upload")} type="button">{status === "analyzing" ? "Analyzing with YouCam…" : "Analyze my baseline"}<span>→</span></button>
-          <button className="app-secondary-action app-full-action" disabled={!consent || status === "analyzing"} onClick={() => analyze("demo")} type="button">Try with consented demo image</button>
+          <button className="app-secondary-action app-full-action" disabled={!consent || status === "analyzing"} onClick={() => analyze("demo")} type="button">Try simulated demo fixture</button>
           {message ? <p aria-live="polite" className={status === "error" ? "app-error-message" : "app-status-message"}>{message}</p> : null}
         </div>
       </section>

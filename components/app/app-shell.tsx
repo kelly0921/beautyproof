@@ -37,7 +37,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav className="app-side-nav" aria-label="App navigation">
           {navigation.map((item) => <Link aria-current={active(item.href) ? "page" : undefined} className={active(item.href) ? "active" : ""} href={item.href} key={item.href}><AppIcon name={item.icon} /><span>{item.label}</span></Link>)}
         </nav>
-        <div className="app-sidebar-note"><span className="app-live-dot" />YouCam + Supabase ready</div>
+        <div className="app-sidebar-note"><span className="app-live-dot" />YouCam analysis · consent controlled</div>
         <Link className="app-judge-link" href="/demo">Open judge demo ↗</Link>
       </aside>
 

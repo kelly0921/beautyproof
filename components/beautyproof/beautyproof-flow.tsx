@@ -7,7 +7,7 @@ import { aggregateReceipts } from "@/lib/evidence/aggregates";
 import { evidenceQuality, qualityLabel } from "@/lib/evidence/quality";
 import { findComparableReceipts } from "@/lib/evidence/similarity";
 import { determineVerdict } from "@/lib/evidence/verdict";
-import { cachedRealDisclosure, demoBaseline, demoFollowups, metricLabels } from "@/lib/demo";
+import { demoBaseline, demoFixtureDisclosure, demoFollowups, metricLabels } from "@/lib/demo";
 import type { AnalysisOrigin, Experience, MetricVector, ProofReceiptRecord, SkinAnalysis, SyntheticReceipt } from "@/lib/domain";
 import type { ProofWindowRecord } from "@/lib/data/repository";
 import { claims, formulas, product, recommendation } from "@/lib/product";
@@ -46,7 +46,7 @@ interface DemoState {
   networkDelta: number;
 }
 
-const storageKey = "beautyproof-demo-state-v1";
+const storageKey = "beautyproof-demo-state-v2";
 const defaultState: DemoState = {
   scenario: "keep",
   sourceMode: "preloaded",
@@ -84,8 +84,8 @@ type AnalysisApiResponse = ApiResponse<{ result: { metrics: MetricVector }; anal
 
 const originLabels: Record<AnalysisOrigin, string> = {
   live_youcam: "Live YouCam Skin AI v2.1",
-  cached_real_youcam: "Cached real YouCam Skin AI v2.1",
-  synthetic: "Synthetic demonstration record",
+  cached_real_youcam: "Verified cached YouCam result",
+  synthetic: "Simulated YouCam-format demo fixture",
 };
 
 async function cameraCaptureFile(image: string) {
@@ -197,6 +197,7 @@ function ProductStep({ go }: { go: (step: FlowStep) => void }) {
           <p className="eyebrow">A new skincare review standard</p>
           <h1 className="display">Skincare reviews from people whose skin <em>started like yours.</em></h1>
           <p className="lede">Generic stars hide the claim, formula, and starting condition. BeautyProof replaces them with comparable, formula-specific personal observations.</p>
+          <p className="origin-chip">Fictional hackathon catalog · Aster Vale, DewSignal, its price, rating, formulas, and claims are demonstration data.</p>
           <div className="button-row">
             <button className="primary-button" onClick={() => go("scan")} type="button">See proof for my starting skin <span aria-hidden="true">→</span></button>
             <span className="fine-print">One guided baseline · cosmetic observation only</span>
@@ -293,7 +294,7 @@ function ScanStep({ state, setState, go }: { state: DemoState; setState: React.D
         </div>
         <div>
           <div className="scan-options">
-            <button className={`source-choice ${state.sourceMode === "preloaded" ? "active" : ""}`} onClick={() => setState((current) => ({ ...current, sourceMode: "preloaded" }))} type="button"><strong>Preloaded consented demo image</strong><span>Reliable judge path · sanitized cached-real result</span></button>
+            <button className={`source-choice ${state.sourceMode === "preloaded" ? "active" : ""}`} onClick={() => setState((current) => ({ ...current, sourceMode: "preloaded" }))} type="button"><strong>Simulated demo fixture</strong><span>Reliable judge path · synthetic origin · no real person</span></button>
             <button className={`source-choice ${state.sourceMode === "upload" ? "active" : ""}`} onClick={() => setState((current) => ({ ...current, sourceMode: "upload" }))} type="button"><strong>High-resolution upload</strong><span>JPG or PNG · under 10 MB · short side at least 1080 px</span></button>
             <button className={`source-choice ${state.sourceMode === "live" ? "active" : ""}`} onClick={() => setState((current) => ({ ...current, sourceMode: "live" }))} type="button"><strong>Live CameraKit</strong><span>Uses hdskincare mode when licensed SDK and device support are available</span></button>
           </div>
@@ -314,8 +315,21 @@ function ScanStep({ state, setState, go }: { state: DemoState; setState: React.D
 function ProofMapStep({ state, go }: { state: DemoState; go: (step: FlowStep) => void }) {
   const baseline = state.baselineMetrics ?? demoBaseline;
   const match = findComparableReceipts({ baseline, formulaVersionId: product.currentFormulaId, claim: claims[0], receipts: seededReceipts });
-  const aggregate = aggregateReceipts(seededReceipts, product.currentFormulaId, claims[0].id);
+  const [aggregate, setAggregate] = useState(() => aggregateReceipts(seededReceipts, product.currentFormulaId, claims[0].id));
+  const [publicContributedReceipts, setPublicContributedReceipts] = useState(0);
+  const [publicContributedDemoReceipts, setPublicContributedDemoReceipts] = useState(0);
   const historical = aggregateReceipts(seededReceipts, product.priorFormulaId, claims[0].id);
+  useEffect(() => {
+    void fetch(`/api/proof-map?formulaVersionId=${product.currentFormulaId}&claimId=${claims[0].id}`)
+      .then(async (response) => await response.json() as { ok: boolean; data?: { aggregate: ReturnType<typeof aggregateReceipts>; publicContributedReceipts: number; publicContributedDemoReceipts: number } })
+      .then((payload) => {
+        if (payload.ok && payload.data) {
+          setAggregate(payload.data.aggregate);
+          setPublicContributedReceipts(payload.data.publicContributedReceipts);
+          setPublicContributedDemoReceipts(payload.data.publicContributedDemoReceipts);
+        }
+      });
+  }, []);
   const representative = [
     match.comparables.find(({ receipt }) => receipt.verdict === "keep")?.receipt,
     match.comparables.find(({ receipt }) => receipt.verdict === "swap" || receipt.verdict === "return")?.receipt,
@@ -325,7 +339,8 @@ function ProofMapStep({ state, go }: { state: DemoState; go: (step: FlowStep) =>
     <main className="page">
       <Progress step="proof-map" />
       <div className="step-heading"><p className="eyebrow">03 / Personalized ProofMap</p><h1 className="section-title">Stars, recompiled as relevant evidence.</h1><p className="lede">Selected claim: <strong>{claims[0].text}</strong> · Exact formula: <strong>{formulas[1].versionLabel}</strong></p></div>
-      <span className="origin-chip">{state.baselineOrigin === "live_youcam" ? "Live result returned by YouCam Skin AI v2.1 through the server integration." : cachedRealDisclosure}</span>
+      <span className="origin-chip">{state.baselineOrigin === "live_youcam" ? "Live result returned by YouCam Skin AI v2.1 through the server integration." : demoFixtureDisclosure}</span>
+      {publicContributedReceipts ? <p className="toast">Shopper ProofMap includes {publicContributedReceipts - publicContributedDemoReceipts} verified and {publicContributedDemoReceipts} simulated consented campaign receipt{publicContributedReceipts === 1 ? "" : "s"}; their origins remain separate.</p> : null}
       <div style={{ marginTop: 16 }}><Metrics values={baseline} /></div>
       <section className="section-gap transformation" aria-label="Generic rating transformed into personalized evidence">
         <div className="old-stars"><div className="star-line">★★★★★</div><strong>{product.genericRating}</strong><span>{product.genericReviewCount.toLocaleString()} reviews · formula and baseline unknown</span></div>
@@ -365,7 +380,7 @@ function ProofMapStep({ state, go }: { state: DemoState; go: (step: FlowStep) =>
         </div>
       </section>
       <div className="section-gap button-row"><button className="primary-button" onClick={() => go("setup")} type="button">Start my hydration ProofWindow <span aria-hidden="true">→</span></button><span className="fine-print">Every product has to earn its place on your shelf.</span></div>
-      <p className="fine-print">Prototype aggregates contain real YouCam-generated records and synthetic demonstration records used to illustrate future network scale.</p>
+      <p className="fine-print">This screen starts with synthetic demonstration records. Only explicitly consented receipts from verified live or cached YouCam analyses count as real user evidence.</p>
     </main>
   );
 }
@@ -409,7 +424,7 @@ function SetupStep({ state, setState, openWindow }: { state: DemoState; setState
       <Progress step="setup" />
       <div className="step-heading"><p className="eyebrow">04 / ProofWindow</p><h1 className="section-title">A claim-aligned personal observation plan.</h1><p className="lede">Coordinated around the product’s 14-day claim and return deadline. This is not a clinical protocol.</p></div>
       <div className="plan-grid">
-        <div className="plan-summary"><p className="eyebrow" style={{ color: "#d7c3cb" }}>Testing one new variable</p><strong>{product.name}</strong><dl><dt>Exact formula</dt><dd>{formulas[1].versionLabel}</dd><dt>Claim</dt><dd>{claims[0].text}</dd><dt>Starting source</dt><dd>{state.baselineOrigin ? originLabels[state.baselineOrigin] : originLabels.cached_real_youcam}</dd></dl></div>
+        <div className="plan-summary"><p className="eyebrow" style={{ color: "#d7c3cb" }}>Testing one new variable</p><strong>{product.name}</strong><dl><dt>Exact formula</dt><dd>{formulas[1].versionLabel}</dd><dt>Claim</dt><dd>{claims[0].text}</dd><dt>Starting source</dt><dd>{state.baselineOrigin ? originLabels[state.baselineOrigin] : originLabels.synthetic}</dd></dl></div>
         <div className="panel panel-pad"><h2 className="subhead">Your observation window</h2><div className="timeline"><div className="timeline-point"><i>0</i><strong>Baseline</strong><br /><small>Starting scan</small></div><div className="timeline-point"><i>7</i><strong>Check</strong><br /><small>Sensory + use</small></div><div className="timeline-point"><i>14</i><strong>Follow-up</strong><br /><small>Claim checkpoint</small></div></div><div className="deadline-strip">Return deadline · 16 days after the final checkpoint</div><p className="fine-print">Keep cleanser, moisturizer, and sunscreen reasonably stable. Record meaningful changes rather than chasing a daily skin score.</p><button className="primary-button button-wide" disabled={saveState === "saving" || !state.baselineAnalysisId} onClick={startWindow} type="button">{saveState === "saving" ? "Creating ProofWindow…" : "Start this ProofWindow"}</button>{saveMessage ? <p aria-live="polite" className={saveState === "error" ? "scan-error" : "analysis-status"}>{saveMessage}</p> : null}</div>
       </div>
     </main>
@@ -484,7 +499,7 @@ function ProgressStep({ state, setState, openReceipt }: { state: DemoState; setS
       const completionResponse = await fetch(`/api/proof-windows/${encodeURIComponent(state.proofWindowId)}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenario: state.scenario, followupAnalysisId: payload.data.analysis.id, experience: state.experience, majorConfounder: state.confounder }),
+        body: JSON.stringify({ scenario: state.scenario, followupAnalysisId: payload.data.analysis.id, experience: state.experience, majorConfounder: state.confounder, demoTimeJump: state.timeJumped }),
       });
       const completion = await completionResponse.json() as ApiResponse<{ receipt: ProofReceiptRecord; persistence: "memory" | "supabase" }>;
       if (!completionResponse.ok || !completion.ok || !completion.data) throw new Error(completion.error?.message || "The ProofReceipt could not be generated.");
@@ -518,18 +533,18 @@ function ProgressStep({ state, setState, openReceipt }: { state: DemoState; setS
       <section className="time-jump">
         <p className="eyebrow">Presentation shortcut · demo only</p>
         <h2 className="subhead">Advance from Day 7 to Day 14</h2>
-        <p className="fine-print">This labeled control changes demo time and trial metadata. It does not fabricate or alter either YouCam measurement.</p>
+      <p className="fine-print">This labeled control changes demo time and trial metadata. It does not alter either measurement, and the resulting receipt remains synthetic because the protocol duration did not actually elapse.</p>
         {!state.timeJumped ? <button className="secondary-button" disabled={!state.checkinSaved} onClick={() => setState((current) => ({ ...current, timeJumped: true }))} type="button">Demo time jump → Day 14</button> : <>
           <div className="followup-source">
             <p className="eyebrow">Second measurement source</p>
             <div className="scan-options">
-              <button className={`source-choice ${followupMode === "preloaded" ? "active" : ""}`} onClick={() => setFollowupMode("preloaded")} type="button"><strong>Preloaded consented follow-up</strong><span>Reliable judge path · sanitized cached-real result</span></button>
+              <button className={`source-choice ${followupMode === "preloaded" ? "active" : ""}`} onClick={() => setFollowupMode("preloaded")} type="button"><strong>Simulated demo follow-up</strong><span>Reliable judge path · synthetic origin · no real person</span></button>
               <button className={`source-choice ${followupMode === "upload" ? "active" : ""}`} onClick={() => setFollowupMode("upload")} type="button"><strong>High-resolution follow-up upload</strong><span>Runs the second live YouCam Skin AI task</span></button>
               <button className={`source-choice ${followupMode === "live" ? "active" : ""}`} onClick={() => setFollowupMode("live")} type="button"><strong>Live CameraKit follow-up</strong><span>Uses hdskincare mode when the licensed SDK is available</span></button>
             </div>
             {followupMode === "upload" ? <label className="upload-field"><strong>Follow-up image for live YouCam analysis</strong><input accept="image/jpeg,image/png" onChange={(event) => setSelectedFollowupFile(event.target.files?.[0] ?? null)} type="file" /><span>{selectedFollowupFile ? `${selectedFollowupFile.name} · ${(selectedFollowupFile.size / 1024 / 1024).toFixed(1)} MB` : "No follow-up image selected"}</span></label> : null}
           </div>
-          <button className="primary-button" disabled={analysisState === "analyzing" || (followupMode === "upload" && !selectedFollowupFile)} onClick={analyzeFollowup} type="button">{analysisState === "analyzing" ? "Analyzing follow-up…" : followupMode === "preloaded" ? <>Analyze cached-real follow-up <span aria-hidden="true">→</span></> : followupMode === "upload" ? <>Analyze live follow-up <span aria-hidden="true">→</span></> : <>Open CameraKit and analyze <span aria-hidden="true">→</span></>}</button>
+          <button className="primary-button" disabled={analysisState === "analyzing" || (followupMode === "upload" && !selectedFollowupFile)} onClick={analyzeFollowup} type="button">{analysisState === "analyzing" ? "Analyzing follow-up…" : followupMode === "preloaded" ? <>Use simulated follow-up <span aria-hidden="true">→</span></> : followupMode === "upload" ? <>Analyze live follow-up <span aria-hidden="true">→</span></> : <>Open CameraKit and analyze <span aria-hidden="true">→</span></>}</button>
         </>}
         {analysisMessage ? <p aria-live="polite" className={analysisState === "error" ? "scan-error" : "analysis-status"}>{analysisMessage}</p> : null}
       </section>
@@ -576,8 +591,8 @@ function ReceiptStep({ state, contribute }: { state: DemoState; contribute: () =
           <div className="receipt-note"><strong>Why {verdict.verdict}:</strong> {verdict.explanation}</div>
           <div className="receipt-note"><strong>Limitation:</strong> These are cosmetic image observations during a personal trial. They do not establish that the product caused a change and are not medical diagnosis, clinical proof, or scientific efficacy verification.</div>
           <div className="evidence-ledger" aria-label="YouCam evidence provenance">
-            <div><small>Baseline analysis</small><strong>{state.baselineProviderTaskId ?? state.baselineAnalysisId ?? "cached demo"}</strong><span>{state.baselineOrigin ? originLabels[state.baselineOrigin] : originLabels.cached_real_youcam}</span></div>
-            <div><small>Follow-up analysis</small><strong>{state.followupProviderTaskId ?? state.followupAnalysisId ?? "cached demo"}</strong><span>{state.followupOrigin ? originLabels[state.followupOrigin] : originLabels.cached_real_youcam}</span></div>
+            <div><small>Baseline analysis</small><strong>{state.baselineProviderTaskId ?? state.baselineAnalysisId ?? "demo fixture"}</strong><span>{state.baselineOrigin ? originLabels[state.baselineOrigin] : originLabels.synthetic}</span></div>
+            <div><small>Follow-up analysis</small><strong>{state.followupProviderTaskId ?? state.followupAnalysisId ?? "demo fixture"}</strong><span>{state.followupOrigin ? originLabels[state.followupOrigin] : originLabels.synthetic}</span></div>
           </div>
           <div className="receipt-footer"><span>Stored ProofWindow: {state.proofWindowId ?? "demo-window"}</span><span>Generated {state.receipt ? new Date(state.receipt.createdAt).toLocaleString() : "Aug 4, 2026"}</span></div>
         </article>
@@ -593,23 +608,24 @@ function ReceiptStep({ state, contribute }: { state: DemoState; contribute: () =
 
 function CoverageStep({ state }: { state: DemoState }) {
   const aggregate = aggregateReceipts(seededReceipts, product.currentFormulaId);
-  const total = aggregate.total + state.networkDelta;
+  const contributedDemo = state.receiptContributed && state.receipt?.origin === "synthetic" ? 1 : 0;
+  const total = aggregate.total + state.networkDelta + contributedDemo;
   const keepCount = aggregate.byVerdict.keep + (state.receiptContributed && state.scenario === "keep" ? 1 : 0);
   return (
     <main className="page page-narrow">
       <Progress step="coverage" />
-      {state.receiptContributed ? <div className="toast">Network updated: Kelly’s consented current-formula hydration receipt is now reflected below.</div> : null}
+      {state.receiptContributed ? <div className="toast">Network updated: the consented receipt is reflected below with its {state.receipt?.origin === "synthetic" ? "synthetic demo" : "verified real"} origin attached.</div> : null}
       <div className="step-heading"><p className="eyebrow">Proof Coverage / Prototype business view</p><h1 className="section-title">Where evidence is strong—and where it is still missing.</h1><p className="lede">The same consented records power the consumer ProofMap and this compact retailer-facing view.</p></div>
       <div className="coverage-grid">
         <section className="coverage-card"><p className="eyebrow">Current formula receipts</p><div className="coverage-number">{total}</div><p className="muted">Across consented claims · {formulas[1].versionLabel}</p></section>
-        <section className="coverage-card"><p className="eyebrow">Origin disclosure</p><div className="origin-split"><div className="origin-cell"><strong>{state.receiptContributed ? 1 : 0}</strong><span>real / cached-real</span></div><div className="origin-cell"><strong>{aggregate.byOrigin.synthetic}</strong><span>synthetic demo</span></div></div></section>
+        <section className="coverage-card"><p className="eyebrow">Origin disclosure</p><div className="origin-split"><div className="origin-cell"><strong>{state.networkDelta}</strong><span>verified user evidence</span></div><div className="origin-cell"><strong>{aggregate.byOrigin.synthetic + contributedDemo}</strong><span>synthetic / demo</span></div></div></section>
         <section className="coverage-card wide"><p className="eyebrow">Decision mix</p><div className="coverage-bars">{(["keep", "swap", "continue", "pause", "return", "inconclusive"] as const).map((verdict) => { const count = verdict === "keep" ? keepCount : aggregate.byVerdict[verdict] + (state.receiptContributed && state.scenario === verdict ? 1 : 0); return <div className="coverage-row" key={verdict}><span>{verdict}</span><div className="mini-bar"><i style={{ width: `${total ? (count / total) * 100 : 0}%` }} /></div><strong>{count}</strong></div>; })}</div></section>
         <section className="coverage-card"><p className="eyebrow">Receipts by claim</p><h2 className="subhead">Hydration leads</h2><p className="muted">Current-formula hydration has the deepest observation set. Sensory finish remains self-reported; barrier repair is not measured.</p></section>
         <section className="coverage-card"><p className="eyebrow">Evidence gap</p><h2 className="subhead">Low-moisture starting band</h2><p className="muted">Only three usable current-formula records begin below a 45 moisture raw score. Recruit observations; do not infer certainty.</p></section>
         <section className="coverage-card"><p className="eyebrow">Proof Loop persistence</p><h2 className="subhead">{state.persistenceMode === "supabase" ? "Durable Supabase" : "Active-process demo"}</h2><p className="muted">{state.persistenceMode === "supabase" ? "Analyses, windows, check-ins, receipts, and consent survive application restarts." : "Configure the server-only Supabase environment to make records restart-safe."}</p></section>
       </div>
       <p className="hypothesis" style={{ marginTop: 18 }}><strong>Prototype insight, not guaranteed commercial impact:</strong> formula-specific evidence may support more informed purchases and more relevant swaps, but revenue and return effects require real-world validation.</p>
-      <p className="fine-print">Prototype aggregates contain real YouCam-generated records and synthetic demonstration records used to illustrate future network scale.</p>
+      <p className="fine-print">Synthetic records illustrate future network scale. They remain separate from verified live or cached YouCam user evidence in every aggregate.</p>
       <div className="button-row" style={{ marginTop: 28 }}><Link className="primary-button" href="/demo">Run the demo again</Link><Link className="ghost-button" href="/products/dewsignal">Return to product</Link></div>
     </main>
   );

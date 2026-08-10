@@ -632,3 +632,359 @@ body:has(.app-experience) > .site-shell > .footer { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .app-proof-card { transition: none; }
 }
+
+/* Proof Campaign upgrade */
+.campaign-page { width: min(1180px, calc(100% - 36px)); margin: 0 auto; padding: clamp(40px, 7vw, 92px) 0; }
+.campaign-hero { display: grid; grid-template-columns: 1.35fr .65fr; gap: clamp(28px, 6vw, 78px); align-items: center; min-height: 650px; }
+.campaign-hero-copy h1, .brand-campaign-header h1, .campaign-index-heading h1 { max-width: 13ch; margin: 10px 0 24px; font: 500 clamp(3.3rem, 7.4vw, 7rem)/.89 Georgia, serif; letter-spacing: -.065em; }
+.campaign-hero-copy h1 em, .brand-campaign-header h1 em { color: var(--plum); font-weight: 500; }
+.campaign-hero-copy .lede { max-width: 62ch; }
+.campaign-manifesto { margin-top: 44px; display: grid; gap: 2px; text-transform: uppercase; letter-spacing: .12em; }
+.campaign-manifesto span { color: var(--muted); font-size: .68rem; font-weight: 800; }
+.campaign-manifesto strong { color: var(--plum-dark); font: 500 clamp(1.7rem, 3vw, 2.8rem)/1 Georgia, serif; letter-spacing: -.035em; text-transform: none; }
+.campaign-brief-card { padding: clamp(28px, 4vw, 44px); border-radius: 8px 8px 52px 8px; color: #fff; background: linear-gradient(150deg, #301421, #6e2d50); box-shadow: 18px 18px 0 rgba(184,216,205,.7), var(--shadow); }
+.campaign-brief-brand { padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,.28); font-size: .65rem; font-weight: 900; letter-spacing: .2em; }
+.campaign-brief-card > p { margin: 26px 0 4px; color: #d7c3cc; font-size: .65rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
+.campaign-brief-card h2 { margin: 0 0 28px; font: 500 2rem/1.05 Georgia, serif; }
+.campaign-brief-card dl { margin: 0; display: grid; }
+.campaign-brief-card dl div { padding: 12px 0; display: grid; gap: 2px; border-top: 1px solid rgba(255,255,255,.16); }
+.campaign-brief-card dt { color: #d7c3cc; font-size: .58rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.campaign-brief-card dd { margin: 0; font-weight: 760; }
+.campaign-neutral-note { margin-top: 22px; padding: 14px; border-radius: 12px; color: #243c34; background: var(--mint); font-size: .72rem; font-weight: 750; }
+.campaign-reset-section, .brand-formula-gap { margin: 50px 0; padding: clamp(28px, 5vw, 54px); display: grid; grid-template-columns: .9fr 1.1fr; gap: 38px; align-items: center; border: 1px solid var(--line); border-radius: 30px; background: rgba(255,253,248,.75); }
+.campaign-reset-section h2, .campaign-compiler h2, .campaign-funding-panel h2, .brand-formula-gap h2, .brand-claim-boundaries h2, .campaign-coverage-panel h2, .campaign-policy-card h2 { margin: 5px 0 12px; font: 500 clamp(2rem, 4vw, 3.7rem)/.98 Georgia, serif; letter-spacing: -.045em; }
+.campaign-reset-section p, .brand-formula-gap p { color: var(--muted); }
+.campaign-reset-counts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; border-radius: 18px; background: var(--line); }
+.campaign-reset-counts > div { min-height: 180px; padding: 22px; display: grid; align-content: center; background: var(--paper); }
+.campaign-reset-counts span { color: var(--muted); font-size: .58rem; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+.campaign-reset-counts strong { font: 500 3.6rem/1 Georgia, serif; }
+.campaign-reset-counts small { color: var(--muted); font-size: .63rem; }
+.campaign-reset-counts .current { color: #193f35; background: #dcebe5; }
+.campaign-reset-counts .gap { color: #fff; background: var(--plum); }
+.campaign-reset-counts .gap span, .campaign-reset-counts .gap small { color: #e4ccd6; }
+.campaign-compiler, .brand-claim-boundaries { padding: 70px 0; }
+.campaign-section-heading { max-width: 720px; }
+.campaign-claim-row, .brand-claim-boundaries > div { margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.campaign-claim-row article, .brand-claim-boundaries article { min-height: 220px; padding: 26px; border: 1px solid var(--line); border-radius: 22px; background: var(--paper); }
+.campaign-claim-row article > span, .brand-claim-boundaries article > span { color: var(--plum); font-size: .58rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.campaign-claim-row article h3, .brand-claim-boundaries article h3 { margin: 34px 0 8px; font: 500 1.7rem Georgia, serif; }
+.campaign-claim-row article p, .brand-claim-boundaries article p { color: var(--muted); font-size: .76rem; }
+.campaign-claim-row .supported { border-color: #78a598; background: #e3efea; }
+.campaign-claim-row .blocked { color: #fff; background: #38232d; }
+.campaign-claim-row .blocked p, .campaign-claim-row .blocked > span { color: #dbc4ce; }
+.campaign-funding-panel { padding: clamp(30px, 6vw, 62px); display: grid; grid-template-columns: 1fr auto; gap: 50px; align-items: center; border-radius: 36px; color: #fff; background: #1f342e; }
+.campaign-funding-panel p { max-width: 65ch; color: #bdd0ca; }
+.campaign-demo-control { min-width: 340px; display: grid; gap: 14px; }
+.campaign-demo-control > div > span { display: block; margin-bottom: 7px; color: #bdd0ca; font-size: .6rem; font-weight: 850; text-transform: uppercase; }
+.campaign-demo-control > div > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.campaign-demo-control > div button { min-height: 38px; border: 1px solid rgba(255,255,255,.2); border-radius: 99px; color: #fff; background: transparent; cursor: pointer; text-transform: capitalize; }
+.campaign-demo-control > div button.selected { color: #1f342e; background: var(--mint); }
+.campaign-reset-button { border: 0; color: #c8d9d3; background: transparent; cursor: pointer; font-size: .65rem; text-decoration: underline; }
+.campaign-demo-control small, .campaign-activation-control small { color: #f0b3c5; }
+.campaign-boundary { margin-top: 18px; color: var(--muted); font-size: .67rem; text-align: center; }
+.campaign-live-pill, .campaign-status { width: fit-content; display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border-radius: 99px; color: #20483d; background: #d8ebe4; font-size: .62rem; font-weight: 850; text-transform: uppercase; }
+.campaign-live-pill i { width: 7px; height: 7px; border-radius: 50%; background: #37816d; box-shadow: 0 0 0 4px rgba(55,129,109,.14); }
+.campaign-index-heading { display: flex; justify-content: space-between; gap: 44px; align-items: end; margin-bottom: 46px; }
+.campaign-index-heading > p { max-width: 48ch; color: var(--muted); }
+.campaign-index-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.campaign-index-card { padding: 30px; border: 1px solid var(--line); border-radius: 28px; background: var(--paper); box-shadow: 0 18px 55px rgba(53,38,43,.07); }
+.campaign-index-card > div:first-child, .campaign-index-card footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.campaign-index-card > div:first-child > span:last-child, .campaign-index-card p, .campaign-index-card footer span { color: var(--muted); font-size: .7rem; }
+.campaign-index-card h2 { margin: 34px 0 10px; font: 500 2.1rem/1 Georgia, serif; }
+.campaign-index-progress, .campaign-progress-large { height: 8px; overflow: hidden; border-radius: 99px; background: #e8e1dc; }
+.campaign-index-progress { margin: 28px 0 16px; }
+.campaign-index-progress i, .campaign-progress-large i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--plum), var(--berry)); }
+.campaign-index-card footer b { font-size: 1.7rem; }
+.campaign-back-link { color: var(--muted); font-size: .72rem; font-weight: 800; }
+.campaign-update-toast { margin: 22px 0; padding: 16px 20px; border-radius: 14px; color: #21483d; background: #dcece6; font-size: .75rem; font-weight: 700; }
+.brand-campaign-header { min-height: 550px; display: grid; grid-template-columns: 1.25fr .75fr; gap: 60px; align-items: center; }
+.brand-campaign-header > div > p:last-of-type { max-width: 58ch; color: var(--muted); }
+.brand-campaign-header .campaign-activation-control, .brand-campaign-header .campaign-live-pill { margin-top: 28px; }
+.brand-campaign-header aside { padding: 42px; border-radius: 28px; color: #fff; background: var(--plum-dark); }
+.brand-campaign-header aside span { font-size: .65rem; letter-spacing: .13em; text-transform: uppercase; }
+.brand-campaign-header aside strong { display: block; margin: 5px 0 24px; font: 500 3rem/1 Georgia, serif; }
+.brand-campaign-header aside p { color: #d9bfca; }
+.brand-campaign-spec { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: var(--line); gap: 1px; }
+.brand-campaign-spec > div { min-height: 118px; padding: 20px; display: grid; align-content: center; gap: 5px; background: var(--paper); }
+.brand-campaign-spec span, .campaign-coverage-grid span { color: var(--muted); font-size: .58rem; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+.brand-campaign-spec strong { font-family: Georgia, serif; font-size: 1.05rem; font-weight: 500; }
+.brand-formula-gap .campaign-reset-counts { grid-template-columns: repeat(2, 1fr); }
+.campaign-coverage-panel { margin-top: 50px; padding: clamp(28px, 5vw, 54px); border-radius: 32px; color: #fff; background: #20352f; }
+.campaign-coverage-panel > header { display: flex; justify-content: space-between; align-items: center; gap: 30px; }
+.campaign-coverage-panel header p { color: #bfd2cb; }
+.campaign-coverage-ring { width: 110px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--mint) var(--campaign-progress), rgba(255,255,255,.12) 0); position: relative; }
+.campaign-coverage-ring::after { content: ""; position: absolute; inset: 12px; border-radius: 50%; background: #20352f; }
+.campaign-coverage-ring strong { z-index: 1; font: 500 1.5rem Georgia, serif; }
+.campaign-progress-large { margin: 28px 0; background: rgba(255,255,255,.12); }
+.campaign-coverage-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; border-radius: 16px; overflow: hidden; background: rgba(255,255,255,.13); }
+.campaign-coverage-grid > div { padding: 20px; display: grid; gap: 4px; background: #2b443d; }
+.campaign-coverage-grid span, .campaign-coverage-grid small { color: #bdd0ca; }
+.campaign-verdict-distribution { margin-top: 28px; display: grid; gap: 9px; }
+.campaign-verdict-distribution > div { display: grid; grid-template-columns: 90px 1fr 28px; gap: 12px; align-items: center; font-size: .68rem; text-transform: capitalize; }
+.campaign-verdict-distribution i { height: 7px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.12); }
+.campaign-verdict-distribution b { display: block; height: 100%; background: var(--mint); }
+.campaign-policy-card { margin-top: 18px; padding: 34px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 30px; align-items: center; border: 1px solid var(--line); border-radius: 24px; background: var(--paper); }
+.campaign-policy-card p { color: var(--muted); font-size: .75rem; }
+
+.app-sponsored-badge { width: fit-content; display: inline-flex; padding: 6px 9px; border-radius: 99px; color: #fff; background: #8b4f6d; font-size: .57rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.app-opportunity-card { margin-bottom: 22px; padding: 24px; display: grid; grid-template-columns: 1fr auto auto; gap: 24px; align-items: center; border-radius: 24px; color: #fff; background: linear-gradient(135deg, #4b2638, #2d5047); box-shadow: 0 20px 55px rgba(45,56,50,.15); }
+.app-opportunity-card h2 { margin: 13px 0 5px; font: 500 1.55rem/1.05 Georgia, serif; }
+.app-opportunity-card p { margin: 0; color: #c8d9d3; font-size: .67rem; }
+.app-opportunity-card aside { min-width: 120px; display: grid; text-align: right; }
+.app-opportunity-card aside span, .app-opportunity-card aside small { color: #c8d9d3; font-size: .57rem; }
+.app-opportunity-card aside strong { font: 500 2.5rem/1 Georgia, serif; }
+.app-opportunity-card > b { font-size: .7rem; }
+.app-campaign-hero { margin-bottom: 18px; padding: clamp(25px, 5vw, 46px); border-radius: 28px; color: #fff; background: linear-gradient(140deg, #3f2030, #76415c); }
+.app-campaign-hero > span { font-size: .6rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.app-campaign-hero .app-kicker { margin-top: 28px; color: #d7bdc9; }
+.app-campaign-hero h1 { max-width: 12ch; margin: 4px 0 13px; font: 500 clamp(2.7rem, 7vw, 5rem)/.9 Georgia, serif; letter-spacing: -.055em; }
+.app-campaign-hero > p:not(.app-kicker) { max-width: 60ch; color: #e1ced6; font-size: .75rem; }
+.app-campaign-hero > div { margin-top: 26px; padding-top: 18px; display: flex; justify-content: space-between; gap: 14px; border-top: 1px solid rgba(255,255,255,.2); }
+.app-campaign-hero > div span { color: #d7bdc9; font-size: .63rem; }
+.app-campaign-boundaries { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.app-campaign-boundaries > div { min-height: 145px; padding: 18px; border: 1px solid var(--app-line); border-radius: 18px; background: var(--app-card); }
+.app-campaign-boundaries span, .app-sponsored-context span, .app-reward-earned aside span { color: #87526b; font-size: .56rem; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+.app-campaign-boundaries strong { display: block; margin: 20px 0 5px; font-family: Georgia, serif; font-weight: 500; }
+.app-campaign-boundaries p { margin: 0; color: var(--app-muted); font-size: .63rem; }
+.app-campaign-inactive, .app-campaign-scan, .app-eligibility-card, .app-enrollment-ready, .app-sponsored-context, .app-reward-earned, .app-receipt-sponsored-banner { margin-top: 18px; padding: 24px; border: 1px solid var(--app-line); border-radius: 22px; background: var(--app-card); }
+.app-campaign-inactive p, .app-campaign-scan > div:first-child p, .app-enrollment-ready p, .app-sponsored-context p, .app-reward-earned p { color: var(--app-muted); font-size: .7rem; }
+.app-campaign-source { margin: 20px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.app-campaign-source button { padding: 16px; display: grid; gap: 3px; border: 1px solid var(--app-line); border-radius: 15px; text-align: left; background: #fff; cursor: pointer; }
+.app-campaign-source button.selected { border-color: #528575; background: #e6f0ec; }
+.app-campaign-source span { color: var(--app-muted); font-size: .59rem; }
+.app-campaign-consent { margin: 18px 0; padding: 15px; display: grid; grid-template-columns: auto 1fr; gap: 10px; border-radius: 14px; background: #f2ecee; font-size: .67rem; }
+.app-campaign-consent.terms { background: #e7f0ed; }
+.app-campaign-consent input { margin-top: 3px; accent-color: var(--app-green); }
+.app-eligibility-card.eligible { border-color: #75a393; background: #f2f8f5; }
+.app-eligibility-card.ineligible { background: #f7f2f3; }
+.app-eligibility-card > header { display: flex; gap: 16px; }
+.app-eligibility-card > header > span, .app-reward-earned > div > span { display: grid; place-items: center; flex: 0 0 42px; height: 42px; border-radius: 50%; color: #fff; background: var(--app-green); font-weight: 900; }
+.app-eligibility-card h2, .app-enrollment-ready h2, .app-reward-earned h2 { margin: 2px 0 5px; font: 500 1.7rem/1 Georgia, serif; }
+.app-eligibility-card header p:last-child { color: var(--app-muted); font-size: .68rem; }
+.app-eligibility-reasons { margin: 20px 0; display: grid; gap: 7px; }
+.app-eligibility-reasons > div { padding: 10px 12px; display: grid; grid-template-columns: auto 1fr; gap: 9px; border-radius: 10px; background: rgba(255,255,255,.7); }
+.app-eligibility-reasons p { margin: 0; color: var(--app-muted); font-size: .63rem; }
+.app-enrollment-ready { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; border-color: #8b5a73; }
+.app-enrollment-ready aside { min-width: 160px; padding: 16px; display: grid; border-radius: 14px; color: #fff; background: #3f2030; }
+.app-enrollment-ready aside span, .app-enrollment-ready aside small { color: #d7bdc9; font-size: .58rem; }
+.app-enrollment-ready aside strong { font-size: 1.3rem; text-transform: uppercase; }
+.app-enrollment-ready > button { grid-column: 1 / -1; }
+.app-sponsored-context { display: grid; grid-template-columns: 1fr auto; gap: 18px; border-color: #b3879b; background: #f7f0f3; }
+.app-sponsored-context > div { display: grid; }
+.app-sponsored-context > div:nth-child(2) { min-width: 130px; }
+.app-sponsored-context small { color: var(--app-muted); font-size: .6rem; }
+.app-sponsored-context p { grid-column: 1 / -1; margin: 0; padding-top: 12px; border-top: 1px solid #decbd4; }
+.app-receipt-sponsored-banner { width: min(760px, 100%); margin: 0 auto 16px; display: flex; align-items: center; gap: 14px; }
+.app-receipt-sponsored-banner div { display: grid; min-width: 0; }
+.app-receipt-sponsored-banner strong { font-size: .72rem; }
+.app-receipt-sponsored-banner small { overflow-wrap: anywhere; color: var(--app-muted); font-size: .56rem; }
+.app-reward-earned { width: min(760px, 100%); margin: 28px auto 0; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; border-color: #70a08f; background: #edf6f2; }
+.app-reward-earned > div { display: flex; gap: 15px; }
+.app-reward-earned aside { min-width: 170px; padding: 16px; display: grid; border-radius: 14px; color: #fff; background: var(--app-green-dark); }
+.app-reward-earned aside strong { font-family: Georgia, serif; font-size: 1.1rem; }
+.app-reward-earned aside span, .app-reward-earned aside small { color: #c6d9d2; }
+
+/* Guided judge journey: one product story across brand and consumer roles. */
+body:has(.guided-demo-experience), body:has(.demo-progress-dock) { background: #edf0eb; }
+body:has(.guided-demo-experience) > .site-shell > .topbar,
+body:has(.guided-demo-experience) > .site-shell > .footer,
+body:has(.demo-progress-dock) > .site-shell > .topbar,
+body:has(.demo-progress-dock) > .site-shell > .footer { display: none; }
+
+.guided-demo-experience {
+  --guide-green: #173f37;
+  --guide-mint: #dcebe5;
+  --guide-plum: #6e2d50;
+  min-height: 100vh;
+  width: min(1280px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 18px 0 24px;
+}
+
+.guided-data-disclosure { margin: 0 0 14px; padding: 12px 16px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; border: 1px solid #d8c5cf; border-radius: 16px; background: #fff8fb; color: #59404b; font-size: .7rem; }
+.guided-data-disclosure strong { color: #7b3155; font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+.guided-data-disclosure small { color: #735b66; font-size: .62rem; }
+.guided-data-disclosure.consumer { margin-top: -6px; }
+.demo-progress-dock {
+  position: sticky;
+  z-index: 45;
+  top: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid #d8ded7;
+  border-radius: 22px;
+  background: rgba(255, 255, 252, .96);
+  box-shadow: 0 18px 48px rgba(29, 45, 39, .1);
+  backdrop-filter: blur(18px);
+}
+.demo-progress-dock > header { min-height: 48px; padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid #e6e9e4; }
+.demo-progress-dock > header > div:first-child { display: flex; align-items: center; gap: 10px; }
+.demo-progress-dock > header > div:first-child > div { display: grid; }
+.demo-progress-dock > header strong { font-size: .76rem; }
+.demo-progress-dock > header small { color: #78807c; font-size: .58rem; }
+.demo-progress-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px 11px 11px 4px; color: #fff; background: var(--guide-green, #173f37); font: 500 1rem Georgia, serif; }
+.demo-progress-count { display: flex; align-items: baseline; gap: 7px; }
+.demo-progress-count span { color: #78807c; font-size: .58rem; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+.demo-progress-count strong { font: 500 1.15rem Georgia, serif !important; }
+.demo-progress-dock ol { margin: 0; padding: 6px 16px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; list-style: none; background: #f7f8f5; }
+.demo-progress-dock li { position: relative; min-width: 0; padding: 5px 8px; display: flex; align-items: center; gap: 8px; border-radius: 11px; color: #929994; }
+.demo-progress-dock li > span { display: grid; place-items: center; width: 24px; height: 24px; flex: 0 0 auto; border: 1px solid #ccd3cd; border-radius: 50%; font-size: .58rem; font-weight: 900; }
+.demo-progress-dock li > div { min-width: 0; display: grid; }
+.demo-progress-dock li strong { overflow: hidden; font-size: .64rem; text-overflow: ellipsis; white-space: nowrap; }
+.demo-progress-dock li small { font-size: .52rem; }
+.demo-progress-dock li.complete { color: #315f52; }
+.demo-progress-dock li.complete > span { color: #fff; border-color: #518371; background: #518371; }
+.demo-progress-dock li.active { color: #fff; background: var(--guide-green, #173f37); }
+.demo-progress-dock li.active > span { color: var(--guide-green, #173f37); border-color: #fff; background: #fff; }
+.demo-progress-dock li.active small { color: #bfd1cb; }
+.demo-progress-dock > footer { min-height: 46px; padding: 7px 16px; display: grid; grid-template-columns: auto 1fr auto; gap: 13px; align-items: center; border-top: 1px solid #e6e9e4; }
+.demo-progress-dock > footer > div { min-width: 0; display: grid; }
+.demo-progress-dock > footer strong { font-size: .72rem; }
+.demo-progress-dock > footer small { overflow: hidden; color: #78807c; font-size: .58rem; text-overflow: ellipsis; white-space: nowrap; }
+.demo-progress-dock > footer > a { color: #315f52; font-size: .62rem; font-weight: 850; }
+.demo-role-badge { padding: 7px 10px; border-radius: 99px; font-size: .56rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.demo-role-badge.brand { color: #fff; background: var(--guide-plum, #6e2d50); }
+.demo-role-badge.consumer { color: #fff; background: var(--guide-green, #173f37); }
+
+.guided-demo-stage { padding: clamp(22px, 4vw, 44px); border: 1px solid #d7ddd6; border-radius: 28px; background: #f9faf7; box-shadow: 0 24px 70px rgba(31, 48, 42, .08); }
+.guided-demo-heading { display: grid; grid-template-columns: .55fr 1fr 1fr; gap: 28px; align-items: end; padding-bottom: 26px; border-bottom: 1px solid #dfe4de; }
+.guided-demo-heading > div, .guided-final-stage > header > div { display: flex; align-items: center; gap: 11px; }
+.guided-screen-number { color: #9ea6a1; font: 500 2.8rem/1 Georgia, serif; }
+.guided-demo-heading > div > div, .guided-final-stage > header > div > div { display: grid; }
+.guided-demo-heading > div p, .guided-final-stage > header > div p { margin: 0; font-size: .68rem; font-weight: 850; }
+.guided-demo-heading > div span:not(.guided-screen-number), .guided-final-stage > header > div span:not(.guided-screen-number) { color: #78807c; font-size: .58rem; text-transform: uppercase; }
+.guided-demo-heading h1, .guided-final-stage > header h1 { margin: 0; font: 500 clamp(2.4rem, 4.6vw, 4.6rem)/.9 Georgia, serif; letter-spacing: -.055em; }
+.guided-demo-heading > p, .guided-final-stage > header > p { margin: 0; color: #69716d; font-size: .82rem; }
+.guided-demo-grid { margin-top: 26px; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr); gap: 18px; }
+.guided-campaign-card { overflow: hidden; padding: clamp(24px, 4vw, 40px); border-radius: 25px; color: #fff; background: linear-gradient(145deg, #37202b, #6e2d50 68%, #7c3d5d); box-shadow: 0 22px 55px rgba(66, 30, 48, .18); }
+.guided-campaign-card > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.guided-campaign-card > header > div { display: grid; }
+.guided-campaign-card > header > div span { font-size: .64rem; font-weight: 900; letter-spacing: .16em; }
+.guided-campaign-card > header small { color: #d9c2cc; font-size: .56rem; }
+.guided-status { padding: 6px 9px; border: 1px solid rgba(255,255,255,.25); border-radius: 99px; font-size: .55rem; font-weight: 900; text-transform: uppercase; }
+.guided-status.active { color: #153e34; border-color: transparent; background: #c9e2d9; }
+.guided-campaign-card h2 { margin: 38px 0 10px; font: 500 clamp(2.5rem, 5vw, 4.9rem)/.88 Georgia, serif; letter-spacing: -.055em; }
+.guided-campaign-card > p { max-width: 54ch; color: #e2cfd7; font-size: .78rem; }
+.guided-campaign-facts { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; border: 1px solid rgba(255,255,255,.18); border-radius: 16px; background: rgba(255,255,255,.18); }
+.guided-campaign-facts > div { min-height: 100px; padding: 16px; display: grid; align-content: center; background: rgba(38, 17, 27, .48); }
+.guided-campaign-facts span, .guided-coverage-preview span { color: #d4b9c5; font-size: .53rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.guided-campaign-facts strong { font-family: Georgia, serif; font-size: 1rem; font-weight: 500; }
+.guided-campaign-facts small, .guided-coverage-preview small { color: #cdb6c0; font-size: .55rem; }
+.guided-coverage-preview { margin-top: 20px; padding: 18px; border-radius: 16px; color: #153e34; background: #dcebe5; }
+.guided-coverage-preview > div:first-child, .guided-coverage-preview > div:last-child { display: flex; justify-content: space-between; gap: 20px; }
+.guided-coverage-preview span, .guided-coverage-preview small { color: #45675d; }
+.guided-coverage-preview strong { font: 500 1.45rem Georgia, serif; }
+.guided-progress-track { height: 7px; overflow: hidden; margin: 12px 0; border-radius: 99px; background: rgba(23,63,55,.14); }
+.guided-progress-track i { display: block; height: 100%; border-radius: inherit; background: #28675e; }
+.guided-evidence-boundaries { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+.guided-evidence-boundaries span { padding: 7px 9px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,.17); border-radius: 99px; color: #eadce2; font-size: .56rem; }
+.guided-evidence-boundaries i { width: 7px; height: 7px; border-radius: 50%; }
+.guided-evidence-boundaries i.supported { background: #86c2ad; }
+.guided-evidence-boundaries i.subjective { background: #e5c274; }
+.guided-evidence-boundaries i.blocked { background: #cf768e; }
+
+.guided-action-panel { padding: clamp(22px, 3vw, 34px); display: flex; flex-direction: column; gap: 22px; border: 1px solid #d8ded7; border-radius: 25px; background: #fffefa; }
+.guided-formula-reset { padding-bottom: 20px; border-bottom: 1px solid #e2e6e1; }
+.guided-formula-reset > span, .guided-scenario-control > span, .guided-action-kicker { color: #7b827e; font-size: .56rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.guided-formula-reset > div { margin-top: 9px; display: grid; grid-template-columns: auto 1fr auto auto 1fr; gap: 8px; align-items: center; }
+.guided-formula-reset strong { font: 500 2rem Georgia, serif; }
+.guided-formula-reset small { color: #757d79; font-size: .54rem; }
+.guided-formula-reset i { color: #9ba39e; font-style: normal; }
+.guided-action-panel h2 { margin: 4px 0 8px; font: 500 2rem/1 Georgia, serif; letter-spacing: -.04em; }
+.guided-action-panel p:not(.guided-action-kicker) { margin: 0; color: #6c746f; font-size: .75rem; }
+.guided-scenario-control > div { margin: 8px 0 6px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.guided-scenario-control button { min-height: 36px; border: 1px solid #d5dad5; border-radius: 99px; color: #68706c; background: #f8f9f6; cursor: pointer; font-size: .62rem; text-transform: capitalize; }
+.guided-scenario-control button.selected { color: #fff; border-color: var(--guide-plum, #6e2d50); background: var(--guide-plum, #6e2d50); }
+.guided-scenario-control small { color: #858c88; font-size: .55rem; }
+.guided-primary-action { min-height: 52px; padding: 0 18px; display: inline-flex; align-items: center; justify-content: space-between; gap: 16px; border: 0; border-radius: 14px; color: #fff; background: var(--guide-green, #173f37); box-shadow: 0 12px 26px rgba(23,63,55,.17); cursor: pointer; font-size: .72rem; font-weight: 850; }
+.guided-primary-action:hover { background: #0f3029; }
+.guided-primary-action:disabled { opacity: .5; cursor: not-allowed; }
+.guided-primary-action span { font-size: 1.1rem; }
+.guided-reset-action { border: 0; color: #7b827e; background: transparent; cursor: pointer; font-size: .6rem; text-decoration: underline; }
+.guided-error { color: #8b3047; font-size: .62rem; }
+.guided-demo-boundary { margin: 13px 0 0; color: #7e8681; font-size: .57rem; text-align: center; }
+
+.guided-consumer-screen .demo-progress-dock { margin-bottom: 18px; }
+.guided-consumer-screen > .app-back-link { margin: 0 0 12px; }
+.guided-app-hero { padding: 26px 30px; }
+.guided-app-hero h1 { max-width: 16ch; font-size: clamp(2.35rem, 5vw, 3.8rem); }
+.guided-app-rule { margin-bottom: 18px; padding: 15px 18px; display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; border: 1px solid #cad8d1; border-radius: 16px; background: #eaf2ee; }
+.guided-app-rule > div { display: grid; }
+.guided-app-rule span, .guided-source-lock span { color: #6e7772; font-size: .55rem; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+.guided-app-rule strong { font: 500 1.05rem Georgia, serif; }
+.guided-app-rule p { margin: 0; color: #65716b; font-size: .66rem; }
+.guided-source-lock { margin: 18px 0; padding: 15px; display: grid; border: 1px solid #c9d9d2; border-radius: 14px; background: #edf5f1; }
+.guided-source-lock strong { font-size: .76rem; }
+.guided-source-lock small { color: #6e7772; font-size: .58rem; }
+.guided-source-lock button { width: fit-content; margin-top: 8px; padding: 0; border: 0; color: #28675e; background: transparent; cursor: pointer; font-size: .6rem; font-weight: 850; text-decoration: underline; }
+
+.guided-brand-result-page { width: min(1280px, calc(100% - 40px)); padding: 18px 0 24px; }
+.guided-final-stage { padding: clamp(24px, 4vw, 44px); border: 1px solid #d7ddd6; border-radius: 28px; background: #f9faf7; box-shadow: 0 24px 70px rgba(31,48,42,.08); }
+.guided-final-stage > header { display: grid; grid-template-columns: .5fr 1.15fr .85fr; gap: 28px; align-items: end; }
+.guided-final-stage .campaign-update-toast { margin: 24px 0 0; }
+.guided-final-grid { margin-top: 18px; display: grid; grid-template-columns: 1.25fr .75fr; gap: 18px; }
+.guided-final-coverage { padding: clamp(24px, 4vw, 40px); border-radius: 24px; color: #fff; background: #20352f; }
+.guided-final-count { display: grid; }
+.guided-final-count > span, .guided-final-stats span { color: #bcd0c8; font-size: .56rem; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+.guided-final-count > strong { margin: 6px 0 3px; font: 500 clamp(3.5rem, 7vw, 6.2rem)/.85 Georgia, serif; }
+.guided-final-count > strong i { color: #aec7be; font-size: .42em; font-style: normal; }
+.guided-final-count > small, .guided-final-stats small { color: #bcd0c8; font-size: .58rem; }
+.guided-final-stats { margin-top: 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; border: 1px solid rgba(255,255,255,.14); border-radius: 14px; background: rgba(255,255,255,.14); }
+.guided-final-stats > div { min-height: 98px; padding: 15px; display: grid; align-content: center; background: #29443c; }
+.guided-final-stats strong { font: 500 1.45rem Georgia, serif; }
+.guided-final-policy { padding: clamp(24px, 4vw, 38px); display: flex; flex-direction: column; border: 1px solid #d8ded7; border-radius: 24px; background: #fffefa; }
+.guided-final-policy > span { color: var(--plum); font-size: .58rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.guided-final-policy h2 { margin: 12px 0; font: 500 clamp(2rem, 4vw, 3.3rem)/.95 Georgia, serif; letter-spacing: -.045em; }
+.guided-final-policy p { color: #69716d; font-size: .74rem; }
+.guided-final-policy > div { margin-top: auto; display: grid; gap: 11px; }
+.guided-final-policy > div > a:last-child { color: #47655c; font-size: .65rem; font-weight: 800; text-align: center; }
+
+@media (max-width: 900px) {
+  .guided-demo-heading, .guided-final-stage > header { grid-template-columns: 1fr; align-items: start; }
+  .guided-demo-grid, .guided-final-grid { grid-template-columns: 1fr; }
+  .demo-progress-dock li { padding: 6px; justify-content: center; }
+  .demo-progress-dock li > div { display: none; }
+  .campaign-hero, .brand-campaign-header, .campaign-reset-section, .brand-formula-gap, .campaign-funding-panel, .campaign-policy-card { grid-template-columns: 1fr; }
+  .campaign-hero { min-height: auto; }
+  .campaign-demo-control { min-width: 0; }
+  .campaign-index-heading { align-items: flex-start; flex-direction: column; }
+  .campaign-index-grid { grid-template-columns: 1fr; }
+  .brand-campaign-spec { grid-template-columns: repeat(2, 1fr); }
+  .campaign-policy-card .secondary-button { width: 100%; }
+}
+
+@media (max-width: 620px) {
+  .guided-demo-experience, .guided-brand-result-page { width: 100%; padding: 0 0 18px; }
+  .guided-demo-experience .demo-progress-dock, .guided-brand-result-page .demo-progress-dock { top: 0; border-right: 0; border-left: 0; border-radius: 0 0 18px 18px; }
+  .guided-consumer-screen .demo-progress-dock { top: 66px; margin-right: -12px; margin-left: -12px; border-radius: 0 0 18px 18px; }
+  .demo-progress-dock > header { min-height: 50px; }
+  .demo-progress-dock ol { padding: 8px 10px; gap: 2px; }
+  .demo-progress-dock li > span { width: 22px; height: 22px; }
+  .demo-progress-dock > footer { grid-template-columns: auto 1fr; }
+  .demo-progress-dock > footer > a { display: none; }
+  .demo-progress-dock > footer small { white-space: normal; }
+  .guided-demo-stage, .guided-final-stage { margin: 12px; padding: 20px; border-radius: 22px; }
+  .guided-demo-heading h1, .guided-final-stage > header h1 { font-size: 2.7rem; }
+  .guided-demo-grid { display: flex; flex-direction: column; }
+  .guided-demo-grid .guided-action-panel { order: -1; }
+  .guided-campaign-card, .guided-action-panel, .guided-final-coverage, .guided-final-policy { padding: 22px; }
+  .guided-campaign-card h2 { font-size: 2.7rem; }
+  .guided-campaign-facts, .guided-final-stats { grid-template-columns: 1fr; }
+  .guided-campaign-facts > div, .guided-final-stats > div { min-height: 76px; }
+  .guided-coverage-preview > div:first-child, .guided-coverage-preview > div:last-child { align-items: flex-start; flex-direction: column; gap: 3px; }
+  .guided-app-rule { grid-template-columns: 1fr; gap: 6px; }
+  .guided-data-disclosure { margin: 10px 12px 0; grid-template-columns: 1fr; gap: 4px; }
+  .guided-data-disclosure.consumer { margin: 0 0 12px; }
+  .campaign-page { width: min(100% - 24px, 560px); padding-top: 42px; }
+  .campaign-page.guided-brand-result-page { width: 100%; padding: 0 0 18px; }
+  .campaign-hero-copy h1, .brand-campaign-header h1, .campaign-index-heading h1 { font-size: 3.25rem; }
+  .campaign-brief-card { box-shadow: 9px 9px 0 rgba(184,216,205,.7); }
+  .campaign-reset-counts, .campaign-claim-row, .brand-claim-boundaries > div, .campaign-coverage-grid, .brand-campaign-spec { grid-template-columns: 1fr; }
+  .campaign-reset-counts > div { min-height: 130px; }
+  .app-opportunity-card, .app-enrollment-ready, .app-sponsored-context, .app-reward-earned { grid-template-columns: 1fr; }
+  .app-opportunity-card aside { text-align: left; }
+  .app-opportunity-card > b { justify-self: start; }
+  .app-campaign-boundaries, .app-campaign-source { grid-template-columns: 1fr; }
+  .app-campaign-hero > div { align-items: flex-start; flex-direction: column; }
+  .app-reward-earned aside { width: 100%; }
+}

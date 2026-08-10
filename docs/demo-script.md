@@ -1,55 +1,74 @@
-# BeautyProof three-minute demo
+# BeautyProof six-step guided demo
 
-Target: 2 minutes 45 seconds.
+Target: approximately 2 minutes 30 seconds.
 
-## 0:00–0:18 — Expose the problem
+The progress dock stays visible throughout the journey. Always orient the viewer with the current role—**Brand view** or **Consumer app**—and make only the primary action for that screen.
 
-“This serum has 2,418 reviews and three promises. None tells Kelly which claim was tested, where the reviewer started, or whether they used the formula sold today.”
+## Step 1 · Fund — Brand view
 
-Show the fictional packshot, generic stars, and Claim Compiler.
+Open `/demo`.
 
-## 0:18–0:40 — Compile the claims
+> “Aster Vale changed the DewSignal formula, so its old reviews cannot responsibly become evidence for the new formula. BeautyProof lets the brand fund one exact gap instead.”
 
-“BeautyProof separates what can and cannot be personally observed. Hydration maps to YouCam raw-score observations. Finish stays subjective. A facial scan cannot establish barrier repair.”
+Show:
 
-Choose **See proof for my starting skin**.
+- The 2026 hydration campaign
+- YouCam moisture as the measurable signal
+- Finish as subjective and barrier repair as blocked
+- The outcome-neutral reward and prototype budget
 
-## 0:40–1:02 — Begin with a baseline
+Keep the default `keep` scenario and choose **Activate campaign and continue**.
 
-Consent and use **High-resolution upload** with a prepared image and the server-side `YOUCAM_API_KEY` configured. For an uninterrupted backup take, use the preloaded image and keep its cached-real disclosure visible.
+## Step 2 · Match — Consumer app
 
-“BeautyProof sends this image through YouCam Skin Analysis v2.1 and requests HD moisture, redness, texture, and oiliness. The credential stays on the server through file initialization, presigned upload, task creation, and polling. These raw scores are a starting measurement—not a beauty or health grade.”
+Point out the role change in the progress dock.
 
-## 1:02–1:28 — Replace stars with proof
+> “The consumer sees a sponsored opportunity—not a promise that the product will work. Matching uses the exact formula, claim, valid YouCam provenance, starting range, and trial readiness. It never uses demographics or facial identity.”
 
-“Now generic stars become receipts for the exact current formula and hydration claim from comparable starting raw scores. No mysterious skin-twin percentage.”
+For the reliable backup, keep the simulated YouCam-format baseline selected and show its synthetic-origin disclosure. For the official API recording, choose **Use live YouCam image instead** and provide the prepared high-resolution image.
 
-Show the individual keep, swap/return, and inconclusive receipts. Scroll to Formula Reset.
+Accept cosmetic-analysis consent and choose **Check campaign eligibility**.
 
-“The product name stayed the same. The evidence did not. Historical receipts remain visible, but a new formula cannot inherit them by default.”
+## Step 3 · Enroll — Consumer app
 
-## 1:28–1:54 — Start a ProofWindow
+Pause on the moisture raw score of 54.2 and the passed eligibility reasons.
 
-Start the window and save the default check-in.
+> “The match is explainable: 54.2 is within this campaign’s starting range of 60 or below.”
 
-“The schedule follows the selected 14-day claim and return deadline. It is a personal observation plan, not a clinical protocol. The check-in takes under ten seconds.”
+Accept the sponsored-trial terms, enroll, show the pending reward ledger, and start the ProofWindow.
 
-Use the labeled demo time jump, select **High-resolution follow-up upload**, and analyze the prepared Day 14 image. For a backup take, use the cached-real follow-up and keep its disclosure visible.
+## Step 4 · Trial — Consumer app
 
-“The second image runs through the same YouCam workflow. BeautyProof stores both analysis IDs, completes the claim-locked ProofWindow, and generates the receipt from those two returned raw-score vectors.”
+The dock now explains one action at a time:
 
-## 1:54–2:27 — Reveal the ProofReceipt
+1. Save the Day 7 check-in.
+2. Use the visibly labeled demo time jump.
+3. Complete the simulated follow-up for a rehearsal, or use the prepared live YouCam follow-up for the official recording. State that the live tasks prove the API integration while the time-jumped receipt remains synthetic because 14 days did not actually elapse.
 
-“This is the new review object: exact formula, claim, stored baseline and follow-up provenance, raw-score changes, use, sensory experience, confounders, evidence quality, return time, origin, and limitations.”
+> “The brand is funding protocol completion. It is not buying praise.”
 
-Pause on the verdict.
+## Step 5 · Reward — Consumer app
 
-“The result does not say the product caused a change. It supports a transparent personal decision: keep, swap, continue, pause, return, or inconclusive.”
+Show the ProofReceipt’s exact formula, claim, raw-score change, sensory experience, evidence quality, limitations, and YouCam provenance.
 
-## 2:27–2:45 — Update the network
+Pause on:
 
-Choose the explicit consent action.
+- The selected `keep`, `swap`, or `inconclusive` verdict
+- **Reward earned for completing the ProofWindow**
+- **Prototype credit ledger · no funds moved**
 
-“With consent, Kelly’s numeric receipt helps the next shopper and updates the same evidence coverage view used by a retailer or brand. Real and synthetic prototype records stay visibly distinct.”
+> “The reward became earned because the protocol was completed—not because the outcome was positive.”
 
-Close: “BeautyProof. Beauty reviews should not begin with stars. They should begin with a baseline.”
+Choose the separate **I consent — add my proof** action, then open updated campaign coverage.
+
+## Step 6 · Coverage — Brand view
+
+Point out the final role change and the campaign count, reward ledger, real-evidence disclosure, and shopper ProofMap consent count.
+
+> “One honest observation closed part of the brand’s exact evidence gap and, with separate consent, now helps the next shopper.”
+
+Close with:
+
+> **“Brands pay for proof, not praise.”**
+
+The flow is cosmetic observation and decision support—not medical diagnosis, causal proof, a clinical trial, real reward issuance, or a financing product.

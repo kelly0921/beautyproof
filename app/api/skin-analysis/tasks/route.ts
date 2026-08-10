@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const fixture = parsed.data.kind === "baseline" ? baseline : followup;
   const result = parseYouCamResult(fixture as YouCamTaskResponse);
   if (parsed.data.kind === "followup") result.metrics = demoFollowups[parsed.data.scenario];
-  const taskId = `cached-${parsed.data.kind}-${parsed.data.scenario}-${crypto.randomUUID()}`;
+  const taskId = `demo-fixture-${parsed.data.kind}-${parsed.data.scenario}-${crypto.randomUUID()}`;
   const repository = getRepository();
   const analysis = await repository.saveAnalysis({
     providerTaskId: taskId,
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     uiScores: result.uiScores,
     maskUrls: result.maskUrls,
     validity: { valid: parsed.data.scenario !== "inconclusive", shortSide: 1600, lighting: parsed.data.scenario === "inconclusive" ? "unknown" : "good" },
-    origin: "cached_real_youcam",
+    origin: "synthetic",
   });
-  return Response.json({ ok: true, data: { taskId, taskStatus: "success", result, analysis, origin: analysis.origin, label: "Cached real YouCam result", persistence: repository.mode } });
+  return Response.json({ ok: true, data: { taskId, taskStatus: "success", result, analysis, origin: analysis.origin, label: "Simulated YouCam-format demo fixture", persistence: repository.mode } });
 }

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       const result = parseYouCamResult(baseline as YouCamTaskResponse);
       const repository = getRepository();
       const analysis = await repository.saveAnalysis({
-        providerTaskId: `cached-upload-${crypto.randomUUID()}`,
+        providerTaskId: `demo-fixture-upload-${crypto.randomUUID()}`,
         sourceType: "cached_demo",
         apiVersion: "v2.1",
         captureMode,
@@ -44,9 +44,9 @@ export async function POST(request: Request) {
         uiScores: result.uiScores,
         maskUrls: result.maskUrls,
         validity: { valid: true, shortSide: validation.shortSide!, lighting: "unknown" },
-        origin: "cached_real_youcam",
+        origin: "synthetic",
       });
-      return Response.json({ ok: true, data: { result, analysis, origin: analysis.origin, validity: validation, fallbackReason: error.code, persistence: repository.mode } });
+      return Response.json({ ok: true, data: { result, analysis, origin: analysis.origin, label: "Simulated YouCam-format demo fixture", validity: validation, fallbackReason: error.code, persistence: repository.mode } });
     }
     if (error instanceof YouCamServiceError) return apiError(error.code, error.message, error.status);
     return apiError("SKIN_ANALYSIS_FAILED", "Skin analysis could not be completed.", 502);

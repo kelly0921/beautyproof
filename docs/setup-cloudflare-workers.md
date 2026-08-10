@@ -71,6 +71,40 @@ Before committing, confirm `.env.local` and `.dev.vars` are not listed.
 
 The first deployment can complete without production credentials. Its `/api/health` response will not yet show durable Supabase or configured YouCam.
 
+## Part 3A — Apply the Proof Campaign migration
+
+The repository now has a second additive migration. Do not edit or replace the already-applied `0001_beautyproof.sql`.
+
+1. Open the Supabase project dashboard.
+2. Open **SQL Editor**.
+3. Choose **New query**.
+4. Copy the complete contents of `supabase/migrations/0002_proof_campaigns.sql`.
+5. Paste the SQL and choose **Run** once.
+6. From the local repository, run:
+
+   ```powershell
+   npm run check:persistence
+   ```
+
+7. Confirm the output includes the seeded **DewSignal 2026 Hydration Proof Campaign** and its campaign coverage count.
+
+The migration adds campaign configuration and a prototype reward ledger, so no new API secret is required.
+
+## Part 3B — Apply the provenance-hardening migration
+
+This cleanup is required if the deterministic demo was run before provenance hardening. It changes only records identifiable as demo fixtures and leaves genuine live uploads untouched.
+
+1. In the same Supabase **SQL Editor**, choose **New query**.
+2. Copy the complete contents of `supabase/migrations/0003_provenance_hardening.sql`.
+3. Paste the SQL and choose **Run** once.
+4. From the local repository, run:
+
+   ```powershell
+   npm run check:persistence
+   ```
+
+5. Confirm that the check completes without a provenance-cleanup warning.
+
 ## Part 4 — Add runtime variables and encrypted secrets
 
 After the Worker exists:
@@ -138,7 +172,7 @@ Confirm the response contains:
 Then verify from a signed-out or private browser window:
 
 1. Open `/app` and confirm the mobile-first dashboard renders.
-2. Open `/demo` and complete the cached-real judge path.
+2. Open `/demo` and complete the clearly labeled simulated judge path.
 3. Upload one prepared high-resolution baseline image through the live YouCam control.
 4. Complete the ProofWindow and upload the prepared follow-up image.
 5. Confirm the ProofReceipt labels both records **Live YouCam Skin AI v2.1**.

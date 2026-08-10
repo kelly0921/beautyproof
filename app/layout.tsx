@@ -21,6 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <span className="demo-label">Personal cosmetic observation</span>
               <Link className="primary-button" href="/app">Open app</Link>
               <Link className="link-button" href="/demo">Demo</Link>
+              <Link className="link-button" href="/brand/campaigns">Proof Campaigns</Link>
               <Link className="link-button" href="/proof-coverage">Proof Coverage</Link>
             </div>
           </header>

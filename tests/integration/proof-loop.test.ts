@@ -14,7 +14,7 @@ async function json<T>(response: Response) {
 describe("persisted Proof Loop", () => {
   beforeEach(async () => await demoRepository.reset());
 
-  it("stores both analyses, completes a ProofWindow, and requires a real receipt before consent", async () => {
+  it("stores simulated analyses and keeps their consented receipt out of real-evidence counts", async () => {
     const baselineResponse = await createCachedAnalysis(new Request("http://test/api/skin-analysis/tasks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -22,7 +22,7 @@ describe("persisted Proof Loop", () => {
     }));
     const baseline = await json<{ analysis: { id: string; providerTaskId: string; origin: string } }>(baselineResponse);
     expect(baseline.ok).toBe(true);
-    expect(baseline.data.analysis.origin).toBe("cached_real_youcam");
+    expect(baseline.data.analysis.origin).toBe("synthetic");
 
     const windowResponse = await createProofWindow(new Request("http://test/api/proof-windows", {
       method: "POST",
@@ -54,17 +54,25 @@ describe("persisted Proof Loop", () => {
     }));
     const followup = await json<{ analysis: { id: string } }>(followupResponse);
 
-    const completionResponse = await completeProofWindow(new Request("http://test/complete", {
+    const earlyCompletionResponse = await completeProofWindow(new Request("http://test/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ scenario: "keep", followupAnalysisId: followup.data.analysis.id, experience: "good", majorConfounder: false }),
     }), { params: Promise.resolve({ id: windowPayload.data.id }) });
-    const completion = await json<{ receipt: { id: string; baselineAnalysisId: string; followupAnalysisId: string; verdict: string; consentToAggregate: boolean } }>(completionResponse);
+    expect(earlyCompletionResponse.status).toBe(409);
+
+    const completionResponse = await completeProofWindow(new Request("http://test/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scenario: "keep", followupAnalysisId: followup.data.analysis.id, experience: "good", majorConfounder: false, demoTimeJump: true }),
+    }), { params: Promise.resolve({ id: windowPayload.data.id }) });
+    const completion = await json<{ receipt: { id: string; baselineAnalysisId: string; followupAnalysisId: string; verdict: string; consentToAggregate: boolean; origin: string } }>(completionResponse);
     expect(completion.data.receipt).toMatchObject({
       baselineAnalysisId: baseline.data.analysis.id,
       followupAnalysisId: followup.data.analysis.id,
       verdict: "keep",
       consentToAggregate: false,
+      origin: "synthetic",
     });
 
     const missingConsentResponse = await consentReceipt(new Request("http://test/consent", {
@@ -80,8 +88,8 @@ describe("persisted Proof Loop", () => {
       body: JSON.stringify({ consent: true }),
     }), { params: Promise.resolve({ id: completion.data.receipt.id }) });
     const consent = await json<{ consented: boolean; networkDelta: number }>(consentResponse);
-    expect(consent.data).toEqual({ receiptId: completion.data.receipt.id, consented: true, networkDelta: 1 });
-    expect(await demoRepository.coverage()).toMatchObject({ storedAnalyses: 2, storedWindows: 1, storedReceipts: 1, contributedReal: 1 });
+    expect(consent.data).toEqual({ receiptId: completion.data.receipt.id, consented: true, networkDelta: 0 });
+    expect(await demoRepository.coverage()).toMatchObject({ storedAnalyses: 2, storedWindows: 1, storedReceipts: 1, contributedReal: 0 });
   });
 
   it("surfaces missing live credentials unless cached fallback was explicitly allowed", async () => {
@@ -109,7 +117,7 @@ describe("persisted Proof Loop", () => {
       fallbackForm.set("allowCachedFallback", "true");
       const fallbackResponse = await uploadAnalysis(new Request("http://test/api/skin-analysis/upload", { method: "POST", body: fallbackForm }));
       const fallback = await json<{ analysis: { origin: string }; fallbackReason: string }>(fallbackResponse);
-      expect(fallback.data).toMatchObject({ analysis: { origin: "cached_real_youcam" }, fallbackReason: "MISSING_CREDENTIAL" });
+      expect(fallback.data).toMatchObject({ analysis: { origin: "synthetic" }, fallbackReason: "MISSING_CREDENTIAL" });
       expect((await demoRepository.coverage()).storedAnalyses).toBe(1);
     } finally {
       if (originalKey === undefined) delete process.env.YOUCAM_API_KEY;

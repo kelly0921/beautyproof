@@ -11,6 +11,6 @@
       ]
     }
   },
-  "fixture_origin": "cached_real_youcam",
-  "fixture_note": "Sanitized demonstration fixture; no face image or personal identifier is stored."
+  "fixture_origin": "synthetic",
+  "fixture_note": "Simulated YouCam-format demonstration fixture; it is not a real user's analysis, and no face image or personal identifier is stored."
 }

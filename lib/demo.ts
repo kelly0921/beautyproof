@@ -20,5 +20,5 @@ export const metricLabels: Record<keyof MetricVector, string> = {
   hd_oiliness: "Oiliness",
 };
 
-export const cachedRealDisclosure =
-  "Cached real YouCam result — sanitized numeric output captured through the v2.1 integration for reliable demonstration.";
+export const demoFixtureDisclosure =
+  "Simulated YouCam-format fixture — deterministic numeric demo data, not a real person's analysis and not verified user evidence.";

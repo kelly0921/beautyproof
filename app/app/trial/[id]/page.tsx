@@ -4,13 +4,18 @@ import { getRepository } from "@/lib/data/repository-provider";
 
 export const dynamic = "force-dynamic";
 
-export default async function AppTrialPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AppTrialPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ scenario?: string; demo?: string }> }) {
   const { id } = await params;
+  const query = await searchParams;
   const repository = getRepository();
   const proofWindow = await repository.getWindow(id);
   if (!proofWindow) notFound();
   const baseline = await repository.getAnalysis(proofWindow.baselineAnalysisId);
   if (!baseline) notFound();
   const receipt = (await repository.listReceipts()).find((entry) => entry.proofWindowId === id);
-  return <AppTrialFlow baseline={baseline} proofWindow={proofWindow} receiptId={receipt?.id} />;
+  const enrollment = proofWindow.campaignEnrollmentId ? await repository.getEnrollment(proofWindow.campaignEnrollmentId) : null;
+  const campaign = enrollment ? await repository.getCampaign(enrollment.campaignId) : null;
+  const reward = enrollment ? await repository.getRewardForEnrollment(enrollment.id) : null;
+  const scenario = ["keep", "swap", "inconclusive"].includes(query.scenario ?? "") ? query.scenario as "keep" | "swap" | "inconclusive" : undefined;
+  return <AppTrialFlow baseline={baseline} campaign={campaign ?? undefined} demoMode={query.demo === "1"} enrollment={enrollment ?? undefined} proofWindow={proofWindow} receiptId={receipt?.id} reward={reward ?? undefined} scenario={scenario} />;
 }

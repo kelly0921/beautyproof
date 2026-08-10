@@ -24,6 +24,14 @@ const server = spawn(process.execPath, [nextBin, "start", "-H", "127.0.0.1", "-p
   cwd,
   stdio: "inherit",
   windowsHide: true,
+  env: {
+    ...process.env,
+    SUPABASE_URL: "",
+    NEXT_PUBLIC_SUPABASE_URL: "",
+    SUPABASE_SECRET_KEY: "",
+    SUPABASE_SERVICE_ROLE_KEY: "",
+    YOUCAM_API_KEY: "",
+  },
 });
 
 async function waitForServer() {
