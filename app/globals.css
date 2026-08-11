@@ -460,8 +460,6 @@ body:has(.app-experience) > .site-shell > .footer { display: none; }
 .app-capture-controls h2, .app-checkin-card h2, .app-followup-card h2, .app-plan-preview h2, .app-consent-card h2 { margin: 0; font-size: 1.45rem; letter-spacing: -.035em; }
 .app-capture-controls > div:first-child > p:last-child, .app-followup-card > div > p:last-child { color: var(--app-muted); font-size: .76rem; }
 .app-file-picker { margin: 20px 0 12px; padding: 16px; display: grid; gap: 4px; border: 1px dashed #aabbb3; border-radius: 15px; cursor: pointer; background: #f7faf7; }
-.app-photo-source-grid { margin: 20px 0 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.app-photo-source-grid .app-file-picker { min-height: 76px; margin: 0; align-content: center; }
 .app-file-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .app-file-picker span { color: var(--app-muted); font-size: .64rem; }
 .app-file-picker strong { color: var(--app-green); font-size: .76rem; overflow-wrap: anywhere; }
@@ -991,5 +989,4 @@ body:has(.demo-progress-dock) > .site-shell > .footer { display: none; }
   .app-campaign-boundaries, .app-campaign-source { grid-template-columns: 1fr; }
   .app-campaign-hero > div { align-items: flex-start; flex-direction: column; }
   .app-reward-earned aside { width: 100%; }
-  .app-photo-source-grid { grid-template-columns: 1fr; }
 }

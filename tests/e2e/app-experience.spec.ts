@@ -10,8 +10,8 @@ test("mobile app shell keeps the primary product actions one tap away", async ({
   await page.getByRole("link", { name: "Scan", exact: true }).click();
   await expect(page).toHaveURL(/\/app\/scan$/);
   await expect(page.getByRole("heading", { name: /Start with a clear picture/i })).toBeVisible();
-  await expect(page.getByLabel("Take a new photo")).toHaveAttribute("capture", "user");
-  await expect(page.getByLabel("Choose from photo library")).not.toHaveAttribute("capture");
+  await expect(page.getByLabel("Choose or take a photo")).not.toHaveAttribute("capture");
+  await expect(page.locator('input[type="file"]')).toHaveCount(1);
 
   await page.getByRole("link", { name: "Proofs", exact: true }).click();
   await expect(page).toHaveURL(/\/app\/proofs$/);

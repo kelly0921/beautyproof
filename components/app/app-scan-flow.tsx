@@ -105,10 +105,7 @@ export function AppScanFlow() {
         <div className="app-face-guide" aria-hidden="true"><div className="app-face-oval"><span>Keep your face centered</span></div><span className="app-light-hint">☼ Even light · no filters</span></div>
         <div className="app-capture-controls">
           <div><p className="app-kicker">HD capture</p><h2>Choose a face photo</h2><p>JPG or PNG · under 10 MB · short side at least 1080 px.</p></div>
-          <div className="app-photo-source-grid">
-            <label className="app-file-picker"><input accept="image/jpeg,image/png" aria-label="Take a new photo" capture="user" onChange={(event) => setFile(event.target.files?.[0] ?? null)} type="file" /><span>Use the front camera</span><strong>Take a new photo</strong></label>
-            <label className="app-file-picker"><input accept="image/jpeg,image/png" aria-label="Choose from photo library" onChange={(event) => setFile(event.target.files?.[0] ?? null)} type="file" /><span>Use an existing image</span><strong>Choose from photo library</strong></label>
-          </div>
+          <label className="app-file-picker"><input accept="image/jpeg,image/png" aria-label="Choose or take a photo" onChange={(event) => setFile(event.target.files?.[0] ?? null)} type="file" /><span>Use your camera or photo library</span><strong>Choose or take a photo</strong></label>
           {file ? <p className="app-selected-photo"><span>Photo selected</span><strong>{file.name} · {(file.size / 1024 / 1024).toFixed(1)} MB</strong></p> : null}
           <label className="app-consent-row"><input checked={consent} onChange={(event) => setConsent(event.target.checked)} type="checkbox" /><span><strong>I consent to this skin analysis.</strong> The image is sent to YouCam for processing; BeautyProof stores numeric observations and provenance, not the face image.</span></label>
           <button className="app-primary-action app-full-action" disabled={!consent || !file || status === "analyzing"} onClick={() => analyze("upload")} type="button">{status === "analyzing" ? "Analyzing with YouCam…" : "Analyze my baseline"}<span>→</span></button>
