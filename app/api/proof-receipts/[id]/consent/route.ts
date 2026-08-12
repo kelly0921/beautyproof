@@ -1,7 +1,10 @@
 import { getRepository } from "@/lib/data/repository-provider";
+import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 import { apiError, consentSchema } from "@/lib/validation/api";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const rejected = rejectUnsafeMutation(request);
+  if (rejected) return rejected;
   const { id } = await params;
   const parsed = consentSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("EXPLICIT_CONSENT_REQUIRED", "Set consent to true to aggregate this receipt.", 400);

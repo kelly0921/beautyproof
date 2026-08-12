@@ -465,6 +465,14 @@ body:has(.app-experience) > .site-shell > .footer { display: none; }
 .app-file-picker strong { color: var(--app-green); font-size: .76rem; overflow-wrap: anywhere; }
 .app-selected-photo { margin: -2px 0 12px; padding: 10px 12px; display: grid; gap: 2px; border-radius: 11px; color: var(--app-muted); background: var(--app-mint); font-size: .64rem; }
 .app-selected-photo strong { color: var(--app-green-dark); overflow-wrap: anywhere; }
+.app-youcam-mask { margin: 18px 0; padding: 18px; display: grid; grid-template-columns: 1fr minmax(140px, 220px); gap: 18px; align-items: center; border: 1px solid var(--app-line); border-radius: 18px; background: #fff; }
+.app-youcam-mask h2 { margin: 3px 0 7px; font-size: 1.15rem; }
+.app-youcam-mask p:last-child { margin: 0; color: var(--app-muted); font-size: .7rem; line-height: 1.55; }
+.app-youcam-mask img { width: 100%; max-height: 220px; object-fit: contain; border-radius: 13px; background: var(--app-mint); }
+.app-resume-baseline { margin: 0 0 18px; padding: 20px; display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; border: 1px solid #bdd2c7; border-radius: 20px; background: linear-gradient(135deg, #eff8f2, #fff); }
+.app-resume-baseline h2 { margin: 5px 0; font-size: 1.25rem; }
+.app-resume-baseline p:last-child { margin: 0; color: var(--app-muted); font-size: .7rem; }
+.app-resume-baseline small { grid-column: 1 / -1; color: #9b3838; }
 .app-consent-row { display: flex; gap: 11px; align-items: flex-start; margin: 16px 0; padding: 14px; border-radius: 13px; background: #f1f3ef; color: var(--app-muted); font-size: .69rem; }
 .app-consent-row input { width: 19px; height: 19px; flex: 0 0 auto; accent-color: var(--app-green); }
 .app-consent-row strong { display: block; color: var(--app-ink); }
@@ -600,6 +608,8 @@ body:has(.app-experience) > .site-shell > .footer { display: none; }
 }
 
 @media (max-width: 620px) {
+  .app-youcam-mask, .app-resume-baseline { grid-template-columns: 1fr; }
+  .app-youcam-mask img { max-height: 260px; }
   .app-main { width: min(100% - 24px, 560px); }
   .app-greeting { margin-bottom: 24px; }
   .app-greeting h1, .app-page-heading h1, .app-result-hero h1, .app-complete-state h1 { font-size: 2.35rem; }

@@ -1,8 +1,11 @@
 import { CampaignServiceError, freshCampaignEligibility } from "@/lib/campaigns/service";
 import { getRepository } from "@/lib/data/repository-provider";
+import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 import { apiError, campaignEnrollmentSchema } from "@/lib/validation/api";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const rejected = rejectUnsafeMutation(request);
+  if (rejected) return rejected;
   const { id } = await params;
   const parsed = campaignEnrollmentSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("CAMPAIGN_CONSENT_REQUIRED", "Accept the outcome-neutral campaign terms before enrollment.", 400, parsed.error.flatten());

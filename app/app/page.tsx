@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ResumeBaselineCard } from "@/components/app/resume-baseline-card";
 import { getRepository } from "@/lib/data/repository-provider";
 import type { SkinAnalysis } from "@/lib/domain";
 import { product } from "@/lib/product";
@@ -30,7 +31,16 @@ export default async function AppHomePage() {
   const heroCampaign = campaigns.find((campaign) => campaign.id === "campaign-dewsignal-hydration-2026");
   const latestReceipt = receipts[0];
   let baseline: SkinAnalysis | null = null;
-  try { baseline = activeWindow ? await repository.getAnalysis(activeWindow.baselineAnalysisId) : null; } catch { dataAvailable = false; }
+  let resumableBaseline: SkinAnalysis | null = null;
+  try {
+    const analyses = await repository.listAnalyses();
+    baseline = activeWindow ? await repository.getAnalysis(activeWindow.baselineAnalysisId) : analyses[0] ?? null;
+    const linkedAnalysisIds = new Set([
+      ...windows.map((window) => window.baselineAnalysisId),
+      ...receipts.flatMap((receipt) => [receipt.baselineAnalysisId, receipt.followupAnalysisId]),
+    ]);
+    resumableBaseline = !activeWindow ? analyses.find((analysis) => !linkedAnalysisIds.has(analysis.id)) ?? null : null;
+  } catch { dataAvailable = false; }
   const currentDay = activeWindow?.checkIns.length ? 7 : 1;
 
   return (
@@ -40,6 +50,7 @@ export default async function AppHomePage() {
         <Link className="app-avatar app-avatar-desktop" href="/app/profile">KC</Link>
       </section>
       {!dataAvailable ? <div className="app-data-warning"><strong>Your app is available.</strong><span>Stored evidence could not be refreshed just now. New records remain protected; retry by refreshing.</span></div> : null}
+      {resumableBaseline ? <ResumeBaselineCard analysis={resumableBaseline} /> : null}
 
       {heroCampaign ? <Link className="app-opportunity-card" href={`/app/campaigns/${heroCampaign.id}`}><div><span className="app-sponsored-badge">Sponsored Proof Trial · fictional demo brand</span><p className="app-kicker">Aster Vale · current 2026 formula</p><h2>Earn $15 for completing a hydration ProofWindow.</h2><p>Moisture starting range ≤ 60 · 14 days · reward independent of outcome</p></div><aside><span>{heroCampaign.status === "active" ? "Opportunity open" : "Preview opportunity"}</span><strong>$15</strong><small>store credit · demo ledger</small></aside><b>Check eligibility →</b></Link> : null}
 

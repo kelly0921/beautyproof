@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { AnalysisOrigin, MetricVector, SkinAnalysis } from "@/lib/domain";
 import { analysisOriginLabel } from "@/lib/provenance";
+import { YouCamMask } from "./youcam-mask";
 
 interface AnalysisPayload {
   ok: boolean;
@@ -89,6 +90,7 @@ export function AppScanFlow() {
         <div className="app-flow-steps" aria-label="ProofWindow setup progress"><span className="complete">1</span><i /><span className="complete">2</span><i /><span>3</span></div>
         <section className="app-result-hero"><span className="app-success-mark">✓</span><p className="app-kicker">Baseline saved</p><h1>Your starting skin is mapped.</h1><p>{analysis.origin === "synthetic" ? "These are simulated YouCam-format scores for demonstrating the workflow—not measurements from a real person." : "These are YouCam raw scores for comparison—not a diagnosis or beauty grade."}</p><span className="app-origin-badge"><i />{analysisOriginLabel(analysis.origin)}</span></section>
         <div className="app-metric-list">{metricOrder.map((metric) => <div className="app-metric-row" key={metric}><div><span>{metricNames[metric]}</span><small>raw score</small></div><strong>{metrics[metric].toFixed(1)}</strong><div className="app-metric-track"><i style={{ width: `${Math.max(4, Math.min(100, metrics[metric]))}%` }} /></div></div>)}</div>
+        <YouCamMask analysis={analysis} />
         <section className="app-plan-preview"><div><p className="app-kicker">Selected proof lens</p><h2>Visible hydration in 14 days</h2><p>DewSignal Adaptive Serum · 2026 US Formula</p></div><div className="app-plan-days"><span><strong>0</strong>Baseline</span><i /><span><strong>7</strong>Check-in</span><i /><span><strong>14</strong>Follow-up</span></div></section>
         <button className="app-primary-action app-full-action" disabled={status === "starting"} onClick={startWindow} type="button">{status === "starting" ? "Starting your trial…" : "Start my 14-day ProofWindow"}<span>→</span></button>
         <button className="app-text-button" onClick={() => { setStatus("idle"); setAnalysis(null); setMetrics(null); }} type="button">Retake baseline</button>

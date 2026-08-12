@@ -76,6 +76,7 @@ export class MemoryDemoRepository implements BeautyProofRepository {
     return { ...record };
   }
   async getAnalysis(id: string) { const record = this.analyses.get(id); return record ? { ...record } : null; }
+  async listAnalyses() { return [...this.analyses.values()].sort((a, b) => b.capturedAt.localeCompare(a.capturedAt)).map((record) => ({ ...record })); }
   async createWindow(input: Omit<ProofWindowRecord, "id" | "checkIns">) {
     if (!this.analyses.has(input.baselineAnalysisId)) throw new Error("BASELINE_ANALYSIS_NOT_FOUND");
     if (input.campaignEnrollmentId && !this.enrollments.has(input.campaignEnrollmentId)) throw new Error("CAMPAIGN_ENROLLMENT_NOT_FOUND");

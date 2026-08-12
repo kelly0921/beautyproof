@@ -2,6 +2,7 @@ import { assertCampaignClaimSupported, CampaignValidationError } from "@/lib/cam
 import { getRepository } from "@/lib/data/repository-provider";
 import type { ProofCampaign } from "@/lib/domain";
 import { claims } from "@/lib/product";
+import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 import { apiError, campaignInputSchema } from "@/lib/validation/api";
 
 export async function GET() {
@@ -12,6 +13,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const rejected = rejectUnsafeMutation(request);
+  if (rejected) return rejected;
   const parsed = campaignInputSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("INVALID_PROOF_CAMPAIGN", "Proof Campaign input is invalid.", 400, parsed.error.flatten());
   const now = new Date().toISOString();

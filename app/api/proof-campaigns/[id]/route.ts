@@ -1,6 +1,7 @@
 import { assertCampaignClaimSupported, CampaignValidationError } from "@/lib/campaigns/claim-guard";
 import { getRepository } from "@/lib/data/repository-provider";
 import { claims } from "@/lib/product";
+import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 import { apiError, campaignPatchSchema } from "@/lib/validation/api";
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +14,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const rejected = rejectUnsafeMutation(request);
+  if (rejected) return rejected;
   const { id } = await params;
   const parsed = campaignPatchSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("INVALID_CAMPAIGN_UPDATE", "Proof Campaign update is invalid.", 400, parsed.error.flatten());

@@ -13,6 +13,7 @@ import type {
 } from "../domain";
 import { seededReceipts } from "../seed";
 import { canExerciseDemoCampaign } from "../provenance";
+import { planSyntheticDemoReset } from "./demo-reset";
 import type { BeautyProofRepository, ProofWindowRecord } from "./repository";
 
 export const demoUserId = "00000000-0000-4000-8000-000000000026";
@@ -346,23 +347,58 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async reset() {
-    const windowsResult = await this.client.from("proof_window").select("id").eq("user_id", demoUserId);
-    assertNoError(windowsResult.error, "list demo windows for reset");
-    const windowIds = (windowsResult.data ?? []).map((row) => row.id as string);
-    if (windowIds.length) {
-      const receiptResult = await this.client.from("proof_receipt").delete().in("proof_window_id", windowIds);
-      assertNoError(receiptResult.error, "delete demo receipts");
-      const checkInResult = await this.client.from("check_in").delete().in("proof_window_id", windowIds);
-      assertNoError(checkInResult.error, "delete demo check-ins");
+    const [analysisResult, windowsResult, enrollmentResult] = await Promise.all([
+      this.client.from("skin_analysis").select("id,origin").eq("user_id", demoUserId),
+      this.client.from("proof_window").select("id,baseline_analysis_id,campaign_enrollment_id").eq("user_id", demoUserId),
+      this.client.from("campaign_enrollment").select("id,baseline_analysis_id").eq("user_id", demoUserId),
+    ]);
+    assertNoError(analysisResult.error, "list analyses for safe demo reset");
+    assertNoError(windowsResult.error, "list windows for safe demo reset");
+    assertNoError(enrollmentResult.error, "list enrollments for safe demo reset");
+
+    const allWindowIds = (windowsResult.data ?? []).map((row) => row.id as string);
+    const receiptResult = allWindowIds.length
+      ? await this.client.from("proof_receipt").select("proof_window_id,followup_analysis_id,origin").in("proof_window_id", allWindowIds)
+      : { data: [], error: null };
+    assertNoError(receiptResult.error, "list receipts for safe demo reset");
+    const scope = planSyntheticDemoReset({
+      analyses: (analysisResult.data ?? []).map((row) => ({ id: row.id as string, origin: row.origin as SkinAnalysis["origin"] })),
+      windows: (windowsResult.data ?? []).map((row) => ({
+        id: row.id as string,
+        baselineAnalysisId: row.baseline_analysis_id as string,
+        campaignEnrollmentId: row.campaign_enrollment_id ? String(row.campaign_enrollment_id) : undefined,
+      })),
+      receipts: (receiptResult.data ?? []).map((row) => ({
+        proofWindowId: row.proof_window_id as string,
+        followupAnalysisId: row.followup_analysis_id as string,
+        origin: row.origin as ProofReceiptRecord["origin"],
+      })),
+      enrollments: (enrollmentResult.data ?? []).map((row) => ({ id: row.id as string, baselineAnalysisId: row.baseline_analysis_id as string })),
+    });
+
+    if (scope.windowIds.length) {
+      const deletedReceipts = await this.client.from("proof_receipt").delete().in("proof_window_id", scope.windowIds);
+      assertNoError(deletedReceipts.error, "delete synthetic demo receipts");
+      const deletedCheckIns = await this.client.from("check_in").delete().in("proof_window_id", scope.windowIds);
+      assertNoError(deletedCheckIns.error, "delete synthetic demo check-ins");
+      const deletedWindows = await this.client.from("proof_window").delete().in("id", scope.windowIds);
+      assertNoError(deletedWindows.error, "delete synthetic demo windows");
     }
-    const windowResult = await this.client.from("proof_window").delete().eq("user_id", demoUserId);
-    assertNoError(windowResult.error, "delete demo windows");
-    const enrollmentResult = await this.client.from("campaign_enrollment").delete().eq("user_id", demoUserId);
-    assertNoError(enrollmentResult.error, "delete demo campaign enrollments");
-    const analysisResult = await this.client.from("skin_analysis").delete().eq("user_id", demoUserId);
-    assertNoError(analysisResult.error, "delete demo analyses");
-    const campaignResult = await this.client.from("proof_campaign").update({ status: "draft" }).eq("id", "campaign-dewsignal-hydration-2026");
-    assertNoError(campaignResult.error, "restore demo Proof Campaign");
+    if (scope.enrollmentIds.length) {
+      const deletedEnrollments = await this.client.from("campaign_enrollment").delete().in("id", scope.enrollmentIds);
+      assertNoError(deletedEnrollments.error, "delete synthetic demo enrollments");
+    }
+    if (scope.analysisIds.length) {
+      const deletedAnalyses = await this.client.from("skin_analysis").delete().in("id", scope.analysisIds);
+      assertNoError(deletedAnalyses.error, "delete synthetic demo analyses");
+    }
+
+    const remainingEnrollments = await this.client.from("campaign_enrollment").select("*", { count: "exact", head: true }).eq("campaign_id", "campaign-dewsignal-hydration-2026");
+    assertNoError(remainingEnrollments.error, "count preserved campaign enrollments");
+    if (!remainingEnrollments.count) {
+      const campaignResult = await this.client.from("proof_campaign").update({ status: "draft" }).eq("id", "campaign-dewsignal-hydration-2026");
+      assertNoError(campaignResult.error, "restore demo Proof Campaign");
+    }
   }
 
   async saveAnalysis(input: Omit<SkinAnalysis, "id" | "userId" | "capturedAt"> & Partial<Pick<SkinAnalysis, "capturedAt">>) {
@@ -386,6 +422,12 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
     const result = await this.client.from("skin_analysis").select("*").eq("id", id).maybeSingle();
     assertNoError(result.error, "get analysis");
     return result.data ? mapAnalysis(result.data as AnalysisRow) : null;
+  }
+
+  async listAnalyses() {
+    const result = await this.client.from("skin_analysis").select("*").eq("user_id", demoUserId).order("captured_at", { ascending: false });
+    assertNoError(result.error, "list analyses");
+    return ((result.data ?? []) as AnalysisRow[]).map(mapAnalysis);
   }
 
   async createWindow(input: Omit<ProofWindowRecord, "id" | "checkIns">) {

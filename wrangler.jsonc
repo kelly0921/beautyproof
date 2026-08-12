@@ -17,6 +17,24 @@
       "service": "beautyproof"
     }
   ],
+  "ratelimits": [
+    {
+      "name": "YOUCAM_USER_RATE_LIMITER",
+      "namespace_id": "826082601",
+      "simple": {
+        "limit": 6,
+        "period": 60
+      }
+    },
+    {
+      "name": "YOUCAM_SITE_RATE_LIMITER",
+      "namespace_id": "826082602",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
+    }
+  ],
   "observability": {
     "enabled": true,
     "logs": {

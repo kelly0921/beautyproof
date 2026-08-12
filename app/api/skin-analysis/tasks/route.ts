@@ -5,8 +5,11 @@ import { demoFollowups } from "@/lib/demo";
 import { parseYouCamResult } from "@/lib/youcam/parser";
 import type { YouCamTaskResponse } from "@/lib/youcam/types";
 import { apiError, taskRequestSchema } from "@/lib/validation/api";
+import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 
 export async function POST(request: Request) {
+  const rejected = rejectUnsafeMutation(request);
+  if (rejected) return rejected;
   const parsed = taskRequestSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("INVALID_TASK_REQUEST", "Task request is invalid.", 400, parsed.error.flatten());
   const fixture = parsed.data.kind === "baseline" ? baseline : followup;

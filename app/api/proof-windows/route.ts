@@ -1,7 +1,10 @@
 import { getRepository } from "@/lib/data/repository-provider";
+import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 import { apiError, windowSchema } from "@/lib/validation/api";
 
 export async function POST(request: Request) {
+  const rejected = rejectUnsafeMutation(request);
+  if (rejected) return rejected;
   const parsed = windowSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("INVALID_PROOF_WINDOW", "ProofWindow input is invalid.", 400, parsed.error.flatten());
   const repository = getRepository();

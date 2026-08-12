@@ -34,6 +34,7 @@ export interface BeautyProofRepository {
   setCampaignStatus(id: string, status: ProofCampaign["status"]): Promise<ProofCampaign | null>;
   saveAnalysis(input: Omit<SkinAnalysis, "id" | "userId" | "capturedAt"> & Partial<Pick<SkinAnalysis, "capturedAt">>): Promise<SkinAnalysis>;
   getAnalysis(id: string): Promise<SkinAnalysis | null>;
+  listAnalyses(): Promise<SkinAnalysis[]>;
   createWindow(input: Omit<ProofWindowRecord, "id" | "checkIns">): Promise<ProofWindowRecord>;
   getWindow(id: string): Promise<ProofWindowRecord | null>;
   listWindows(): Promise<ProofWindowRecord[]>;

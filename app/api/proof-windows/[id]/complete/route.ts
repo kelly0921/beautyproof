@@ -3,8 +3,11 @@ import { apiError, completeWindowSchema } from "@/lib/validation/api";
 import { evidenceQuality } from "@/lib/evidence/quality";
 import { determineVerdict } from "@/lib/evidence/verdict";
 import { rewardEarnedAfterStoredReceipt } from "@/lib/campaigns/rewards";
+import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const rejected = rejectUnsafeMutation(request);
+  if (rejected) return rejected;
   const { id } = await params;
   const parsed = completeWindowSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("INVALID_COMPLETION", "ProofWindow completion input is invalid.", 400, parsed.error.flatten());

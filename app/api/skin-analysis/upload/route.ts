@@ -5,8 +5,12 @@ import { YouCamServiceError, YouCamSkinAnalysisService } from "@/lib/youcam/serv
 import type { YouCamTaskResponse } from "@/lib/youcam/types";
 import { apiError } from "@/lib/validation/api";
 import { validateHdImage } from "@/lib/validation/image";
+import { rejectUnsafeMutation } from "@/lib/security/same-origin";
+import { rejectRateLimitedYouCamUpload } from "@/lib/security/youcam-rate-limit";
 
 export async function POST(request: Request) {
+  const rejected = rejectUnsafeMutation(request);
+  if (rejected) return rejected;
   const form = await request.formData();
   const file = form.get("file");
   const allowCachedFallback = form.get("allowCachedFallback") !== "false";
@@ -15,6 +19,8 @@ export async function POST(request: Request) {
   const bytes = new Uint8Array(await file.arrayBuffer());
   const validation = validateHdImage(file, bytes);
   if (!validation.valid) return apiError(validation.code ?? "INVALID_IMAGE", validation.message ?? "Invalid image.", 400, validation);
+  const rateLimited = await rejectRateLimitedYouCamUpload(request);
+  if (rateLimited) return rateLimited;
   try {
     const service = new YouCamSkinAnalysisService();
     const result = await service.analyze(file);

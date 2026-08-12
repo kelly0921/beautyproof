@@ -1,7 +1,10 @@
 import { getRepository } from "@/lib/data/repository-provider";
+import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 import { apiError, checkInSchema } from "@/lib/validation/api";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const rejected = rejectUnsafeMutation(request);
+  if (rejected) return rejected;
   const { id } = await params;
   const parsed = checkInSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("INVALID_CHECK_IN", "Check-in input is invalid.", 400, parsed.error.flatten());
