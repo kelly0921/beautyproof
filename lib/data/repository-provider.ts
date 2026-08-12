@@ -1,8 +1,12 @@
+import { headers } from "next/headers";
 import type { BeautyProofRepository } from "./repository";
-import { demoRepository } from "./demo-repository";
-import { SupabaseBeautyProofRepository } from "./supabase-repository";
+import { demoRepository, MemoryDemoRepository } from "./demo-repository";
+import { demoUserId, SupabaseBeautyProofRepository } from "./supabase-repository";
+import { sessionUserIdFromHeaders } from "../security/session";
 
-let supabaseRepository: SupabaseBeautyProofRepository | null = null;
+const repositoryRuntime = globalThis as typeof globalThis & { beautyProofPrivateRepositories?: Map<string, BeautyProofRepository> };
+const memoryRepositories = repositoryRuntime.beautyProofPrivateRepositories ?? new Map<string, BeautyProofRepository>();
+repositoryRuntime.beautyProofPrivateRepositories = memoryRepositories;
 
 export interface PersistenceConfiguration {
   mode: "memory" | "supabase" | "invalid";
@@ -23,11 +27,25 @@ export function persistenceConfiguration(): PersistenceConfiguration {
   return { mode: "supabase", configured: true, message: "Supabase durable persistence is configured." };
 }
 
-export function getRepository(): BeautyProofRepository {
+export function getRepository(userId = demoUserId): BeautyProofRepository {
   const config = persistenceConfiguration();
-  if (config.mode === "memory") return demoRepository;
+  if (config.mode === "memory") {
+    if (userId === demoUserId) return demoRepository;
+    const existing = memoryRepositories.get(userId);
+    if (existing) return existing;
+    const repository = new MemoryDemoRepository(userId);
+    memoryRepositories.set(userId, repository);
+    return repository;
+  }
   if (config.mode === "invalid") throw new Error(`INVALID_PERSISTENCE_CONFIGURATION: ${config.message}`);
   const { url, secretKey } = environment();
-  if (!supabaseRepository) supabaseRepository = new SupabaseBeautyProofRepository(url, secretKey);
-  return supabaseRepository;
+  return new SupabaseBeautyProofRepository(url, secretKey, userId);
+}
+
+export function getRepositoryForRequest(request: Request): BeautyProofRepository {
+  return getRepository(sessionUserIdFromHeaders(request.headers));
+}
+
+export async function getRequestRepository(): Promise<BeautyProofRepository> {
+  return getRepository(sessionUserIdFromHeaders(await headers()));
 }

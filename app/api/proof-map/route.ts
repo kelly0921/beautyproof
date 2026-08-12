@@ -14,10 +14,9 @@ export async function GET(request: Request) {
   const claim = claims.find((entry) => entry.id === claimId);
   if (!claim || formulaVersionId !== product.currentFormulaId) return apiError("PROOF_LENS_NOT_FOUND", "This formula and claim lens is not configured.", 404);
   const repository = getRepository();
-  const [storedReceipts, windows] = await Promise.all([repository.listReceipts(), repository.listWindows()]);
-  const publicReceipts: SyntheticReceipt[] = storedReceipts.flatMap((receipt) => {
-    const window = windows.find((entry) => entry.id === receipt.proofWindowId);
-    if (!receipt.consentToAggregate || !window || window.formulaVersionId !== formulaVersionId || window.claimId !== claimId) return [];
+  const contributions = await repository.listPublicContributions();
+  const publicReceipts: SyntheticReceipt[] = contributions.flatMap(({ receipt, proofWindow: window }) => {
+    if (window.formulaVersionId !== formulaVersionId || window.claimId !== claimId) return [];
     return [{
       id: receipt.id,
       formulaVersionId: window.formulaVersionId,

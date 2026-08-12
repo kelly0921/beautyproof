@@ -14,7 +14,7 @@ import type {
 import { seededReceipts } from "../seed";
 import { canExerciseDemoCampaign } from "../provenance";
 import { planSyntheticDemoReset } from "./demo-reset";
-import type { BeautyProofRepository, ProofWindowRecord } from "./repository";
+import type { BeautyProofRepository, ProofWindowRecord, PublicProofContribution } from "./repository";
 
 export const demoUserId = "00000000-0000-4000-8000-000000000026";
 
@@ -245,7 +245,7 @@ function mapWindow(row: WindowRow, checkIns: CheckInRow[] = []): ProofWindowReco
     startDate: row.start_date,
     plannedEndDate: row.planned_end_date,
     returnDeadline: row.return_deadline,
-    status: row.status === "complete" ? "complete" : "active",
+    status: row.status === "complete" ? "complete" : row.status === "withdrawn" ? "withdrawn" : "active",
     campaignEnrollmentId: row.campaign_enrollment_id ?? undefined,
     checkIns: checkIns.map((entry) => ({
       date: entry.checkin_date,
@@ -282,7 +282,7 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   readonly mode = "supabase" as const;
   private readonly client: SupabaseClient;
 
-  constructor(url: string, secretKey: string) {
+  constructor(url: string, secretKey: string, private readonly userId = demoUserId) {
     this.client = createClient(url, secretKey, {
       auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
       global: {
@@ -290,6 +290,15 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
         headers: { "x-application-name": "beautyproof" },
       },
     });
+  }
+
+  private async ensureUser() {
+    const result = await this.client.from("app_user").upsert({
+      id: this.userId,
+      display_name: this.userId === demoUserId ? "BeautyProof Demo" : "BeautyProof Visitor",
+      consent_status: "explicit-per-action",
+    }, { onConflict: "id", ignoreDuplicates: true });
+    assertNoError(result.error, "ensure private app user");
   }
 
   async listBrands() {
@@ -348,9 +357,9 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
 
   async reset() {
     const [analysisResult, windowsResult, enrollmentResult] = await Promise.all([
-      this.client.from("skin_analysis").select("id,origin").eq("user_id", demoUserId),
-      this.client.from("proof_window").select("id,baseline_analysis_id,campaign_enrollment_id").eq("user_id", demoUserId),
-      this.client.from("campaign_enrollment").select("id,baseline_analysis_id").eq("user_id", demoUserId),
+      this.client.from("skin_analysis").select("id,origin").eq("user_id", this.userId),
+      this.client.from("proof_window").select("id,baseline_analysis_id,campaign_enrollment_id").eq("user_id", this.userId),
+      this.client.from("campaign_enrollment").select("id,baseline_analysis_id").eq("user_id", this.userId),
     ]);
     assertNoError(analysisResult.error, "list analyses for safe demo reset");
     assertNoError(windowsResult.error, "list windows for safe demo reset");
@@ -402,8 +411,9 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async saveAnalysis(input: Omit<SkinAnalysis, "id" | "userId" | "capturedAt"> & Partial<Pick<SkinAnalysis, "capturedAt">>) {
+    await this.ensureUser();
     const result = await this.client.from("skin_analysis").insert({
-      user_id: demoUserId,
+      user_id: this.userId,
       captured_at: input.capturedAt ?? new Date().toISOString(),
       provider_task_id: input.providerTaskId ?? null,
       source_type: input.sourceType,
@@ -419,20 +429,23 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async getAnalysis(id: string) {
-    const result = await this.client.from("skin_analysis").select("*").eq("id", id).maybeSingle();
+    const result = await this.client.from("skin_analysis").select("*").eq("id", id).eq("user_id", this.userId).maybeSingle();
     assertNoError(result.error, "get analysis");
     return result.data ? mapAnalysis(result.data as AnalysisRow) : null;
   }
 
   async listAnalyses() {
-    const result = await this.client.from("skin_analysis").select("*").eq("user_id", demoUserId).order("captured_at", { ascending: false });
+    const result = await this.client.from("skin_analysis").select("*").eq("user_id", this.userId).order("captured_at", { ascending: false });
     assertNoError(result.error, "list analyses");
     return ((result.data ?? []) as AnalysisRow[]).map(mapAnalysis);
   }
 
   async createWindow(input: Omit<ProofWindowRecord, "id" | "checkIns">) {
+    const [baseline, windows] = await Promise.all([this.getAnalysis(input.baselineAnalysisId), this.listWindows()]);
+    if (!baseline) throw new Error("BASELINE_ANALYSIS_NOT_FOUND");
+    if (windows.some((window) => window.status === "active")) throw new Error("ACTIVE_PROOF_WINDOW_EXISTS");
     const result = await this.client.from("proof_window").insert({
-      user_id: demoUserId,
+      user_id: this.userId,
       formula_version_id: input.formulaVersionId,
       claim_id: input.claimId,
       baseline_analysis_id: input.baselineAnalysisId,
@@ -447,7 +460,7 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async getWindow(id: string) {
-    const windowResult = await this.client.from("proof_window").select("*").eq("id", id).maybeSingle();
+    const windowResult = await this.client.from("proof_window").select("*").eq("id", id).eq("user_id", this.userId).maybeSingle();
     assertNoError(windowResult.error, "get ProofWindow");
     if (!windowResult.data) return null;
     const checkInResult = await this.client.from("check_in").select("checkin_date,used_product,experience,confounder_note_nullable").eq("proof_window_id", id).order("checkin_date");
@@ -456,7 +469,7 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async listWindows() {
-    const windowResult = await this.client.from("proof_window").select("*").eq("user_id", demoUserId).order("start_date", { ascending: false });
+    const windowResult = await this.client.from("proof_window").select("*").eq("user_id", this.userId).order("start_date", { ascending: false });
     assertNoError(windowResult.error, "list ProofWindows");
     const rows = (windowResult.data ?? []) as WindowRow[];
     if (!rows.length) return [];
@@ -471,6 +484,7 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async addCheckIn(id: string, input: ProofWindowRecord["checkIns"][number]) {
+    if (!await this.getWindow(id)) return null;
     const result = await this.client.from("check_in").insert({
       proof_window_id: id,
       checkin_date: input.date,
@@ -484,9 +498,24 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async completeWindow(id: string) {
-    const result = await this.client.from("proof_window").update({ status: "complete" }).eq("id", id).select("*").maybeSingle();
+    const result = await this.client.from("proof_window").update({ status: "complete" }).eq("id", id).eq("user_id", this.userId).select("*").maybeSingle();
     assertNoError(result.error, "complete ProofWindow");
     return result.data ? await this.getWindow(id) : null;
+  }
+
+  async withdrawWindow(id: string) {
+    const record = await this.getWindow(id);
+    if (!record || record.status !== "active") return null;
+    const result = await this.client.from("proof_window").update({ status: "withdrawn" }).eq("id", id).eq("user_id", this.userId).select("*").maybeSingle();
+    assertNoError(result.error, "withdraw ProofWindow");
+    if (!result.data) return null;
+    if (record.campaignEnrollmentId) {
+      const enrollmentResult = await this.client.from("campaign_enrollment").update({ status: "withdrawn" }).eq("id", record.campaignEnrollmentId).eq("user_id", this.userId);
+      assertNoError(enrollmentResult.error, "withdraw campaign enrollment");
+      const rewardResult = await this.client.from("reward_ledger").update({ note: "Trial withdrawn; no prototype reward was earned." }).eq("enrollment_id", record.campaignEnrollmentId).eq("status", "pending");
+      assertNoError(rewardResult.error, "close withdrawn reward ledger entry");
+    }
+    return await this.getWindow(id);
   }
 
   async createEnrollment(input: Parameters<BeautyProofRepository["createEnrollment"]>[0]) {
@@ -535,14 +564,15 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async getEnrollment(id: string) {
-    const result = await this.client.from("campaign_enrollment").select("*").eq("id", id).maybeSingle();
+    const result = await this.client.from("campaign_enrollment").select("*").eq("id", id).eq("user_id", this.userId).maybeSingle();
     assertNoError(result.error, "get campaign enrollment");
     return result.data ? mapEnrollment(result.data as EnrollmentRow) : null;
   }
 
   async listEnrollments(userId?: string) {
     let query = this.client.from("campaign_enrollment").select("*").order("created_at", { ascending: false });
-    if (userId) query = query.eq("user_id", userId);
+    query = query.eq("user_id", this.userId);
+    if (userId && userId !== this.userId) return [];
     const result = await query;
     assertNoError(result.error, "list campaign enrollments");
     return ((result.data ?? []) as EnrollmentRow[]).map(mapEnrollment);
@@ -555,6 +585,7 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
       .from("proof_window")
       .update({ campaign_enrollment_id: enrollmentId })
       .eq("id", windowId)
+      .eq("user_id", this.userId)
       .select("*")
       .maybeSingle();
     if (windowResult.error?.code === "23505") throw new Error("CAMPAIGN_ENROLLMENT_ALREADY_LINKED");
@@ -586,10 +617,13 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   async getReward(id: string) {
     const result = await this.client.from("reward_ledger").select("*").eq("id", id).maybeSingle();
     assertNoError(result.error, "get reward ledger entry");
-    return result.data ? mapReward(result.data as RewardRow) : null;
+    if (!result.data) return null;
+    const reward = mapReward(result.data as RewardRow);
+    return await this.getEnrollment(reward.enrollmentId) ? reward : null;
   }
 
   async getRewardForEnrollment(enrollmentId: string) {
+    if (!await this.getEnrollment(enrollmentId)) return null;
     const result = await this.client.from("reward_ledger").select("*").eq("enrollment_id", enrollmentId).maybeSingle();
     assertNoError(result.error, "get enrollment reward");
     return result.data ? mapReward(result.data as RewardRow) : null;
@@ -607,6 +641,7 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async saveReceipt(input: Omit<ProofReceiptRecord, "id" | "createdAt" | "consentToAggregate">) {
+    if (!await this.getWindow(input.proofWindowId)) throw new Error("PROOF_WINDOW_NOT_FOUND");
     const existing = await this.getReceiptByWindow(input.proofWindowId);
     if (existing) return existing;
     const result = await this.client.from("proof_receipt").insert({
@@ -635,17 +670,20 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   async getReceipt(id: string) {
     const result = await this.client.from("proof_receipt").select("*").eq("id", id).maybeSingle();
     assertNoError(result.error, "get ProofReceipt");
-    return result.data ? mapReceipt(result.data as ReceiptRow) : null;
+    if (!result.data) return null;
+    const receipt = mapReceipt(result.data as ReceiptRow);
+    return await this.getWindow(receipt.proofWindowId) ? receipt : null;
   }
 
   async getReceiptByWindow(proofWindowId: string) {
+    if (!await this.getWindow(proofWindowId)) return null;
     const result = await this.client.from("proof_receipt").select("*").eq("proof_window_id", proofWindowId).maybeSingle();
     assertNoError(result.error, "get ProofReceipt by window");
     return result.data ? mapReceipt(result.data as ReceiptRow) : null;
   }
 
   async listReceipts() {
-    const windowsResult = await this.client.from("proof_window").select("id").eq("user_id", demoUserId);
+    const windowsResult = await this.client.from("proof_window").select("id").eq("user_id", this.userId);
     assertNoError(windowsResult.error, "list receipt ProofWindows");
     const windowIds = (windowsResult.data ?? []).map((row) => row.id as string);
     if (!windowIds.length) return [];
@@ -654,7 +692,33 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
     return ((result.data ?? []) as ReceiptRow[]).map(mapReceipt);
   }
 
+  async listPublicContributions(): Promise<PublicProofContribution[]> {
+    const receiptResult = await this.client.from("proof_receipt").select("*").eq("consent_to_aggregate", true).order("created_at", { ascending: false });
+    assertNoError(receiptResult.error, "list consented public ProofReceipts");
+    const receipts = ((receiptResult.data ?? []) as ReceiptRow[]).map(mapReceipt);
+    if (!receipts.length) return [];
+    const windowResult = await this.client.from("proof_window").select("*").in("id", receipts.map((receipt) => receipt.proofWindowId));
+    assertNoError(windowResult.error, "list public ProofReceipt windows");
+    const windows = (windowResult.data ?? []) as WindowRow[];
+    const enrollmentIds = windows.flatMap((window) => window.campaign_enrollment_id ? [window.campaign_enrollment_id] : []);
+    const enrollmentResult = enrollmentIds.length
+      ? await this.client.from("campaign_enrollment").select("id,campaign_id").in("id", enrollmentIds)
+      : { data: [], error: null };
+    assertNoError(enrollmentResult.error, "list public ProofReceipt campaigns");
+    const enrollmentCampaigns = new Map((enrollmentResult.data ?? []).map((row) => [String(row.id), String(row.campaign_id)]));
+    return receipts.flatMap((receipt) => {
+      const row = windows.find((window) => window.id === receipt.proofWindowId);
+      if (!row) return [];
+      return [{
+        receipt,
+        proofWindow: mapWindow(row),
+        campaignId: row.campaign_enrollment_id ? enrollmentCampaigns.get(row.campaign_enrollment_id) : undefined,
+      }];
+    });
+  }
+
   async consentReceipt(id: string) {
+    if (!await this.getReceipt(id)) return { receiptId: id, consented: false, networkDelta: (await this.coverage()).networkDelta };
     const result = await this.client.from("proof_receipt").update({ consent_to_aggregate: true }).eq("id", id).select("id").maybeSingle();
     assertNoError(result.error, "consent ProofReceipt");
     if (!result.data) return { receiptId: id, consented: false, networkDelta: (await this.coverage()).networkDelta };
@@ -662,18 +726,23 @@ export class SupabaseBeautyProofRepository implements BeautyProofRepository {
   }
 
   async coverage() {
-    const [analysisResult, windowResult, receiptResult, consentResult] = await Promise.all([
-      this.client.from("skin_analysis").select("*", { count: "exact", head: true }).eq("user_id", demoUserId),
-      this.client.from("proof_window").select("*", { count: "exact", head: true }).eq("user_id", demoUserId),
-      this.client.from("proof_receipt").select("*", { count: "exact", head: true }),
+    const windowIdsResult = await this.client.from("proof_window").select("id").eq("user_id", this.userId);
+    assertNoError(windowIdsResult.error, "list private ProofWindows for coverage");
+    const windowIds = (windowIdsResult.data ?? []).map((row) => row.id as string);
+    const [analysisResult, windowResult, receiptResult, personalConsentResult, consentResult] = await Promise.all([
+      this.client.from("skin_analysis").select("*", { count: "exact", head: true }).eq("user_id", this.userId),
+      this.client.from("proof_window").select("*", { count: "exact", head: true }).eq("user_id", this.userId),
+      windowIds.length ? this.client.from("proof_receipt").select("*", { count: "exact", head: true }).in("proof_window_id", windowIds) : Promise.resolve({ count: 0, error: null }),
+      windowIds.length ? this.client.from("proof_receipt").select("*", { count: "exact", head: true }).in("proof_window_id", windowIds).eq("consent_to_aggregate", true).eq("origin", "real") : Promise.resolve({ count: 0, error: null }),
       this.client.from("proof_receipt").select("*", { count: "exact", head: true }).eq("consent_to_aggregate", true).eq("origin", "real"),
     ]);
     assertNoError(analysisResult.error, "count analyses");
     assertNoError(windowResult.error, "count windows");
     assertNoError(receiptResult.error, "count receipts");
+    assertNoError(personalConsentResult.error, "count private consented receipts");
     assertNoError(consentResult.error, "count consented receipts");
     return {
-      contributedReal: consentResult.count ?? 0,
+      contributedReal: personalConsentResult.count ?? 0,
       networkDelta: consentResult.count ?? 0,
       storedAnalyses: analysisResult.count ?? 0,
       storedWindows: windowResult.count ?? 0,

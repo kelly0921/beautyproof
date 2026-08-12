@@ -1,5 +1,5 @@
 import baseline from "@/lib/youcam/fixtures/baseline.json";
-import { getRepository } from "@/lib/data/repository-provider";
+import { getRepositoryForRequest } from "@/lib/data/repository-provider";
 import { parseYouCamResult } from "@/lib/youcam/parser";
 import { YouCamServiceError, YouCamSkinAnalysisService } from "@/lib/youcam/service";
 import type { YouCamTaskResponse } from "@/lib/youcam/types";
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   try {
     const service = new YouCamSkinAnalysisService();
     const result = await service.analyze(file);
-    const repository = getRepository();
+    const repository = getRepositoryForRequest(request);
     const analysis = await repository.saveAnalysis({
       providerTaskId: result.taskId,
       sourceType: captureMode === "hdskincare" ? "live" : "uploaded",
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (allowCachedFallback && error instanceof YouCamServiceError && error.code === "MISSING_CREDENTIAL") {
       const result = parseYouCamResult(baseline as YouCamTaskResponse);
-      const repository = getRepository();
+      const repository = getRepositoryForRequest(request);
       const analysis = await repository.saveAnalysis({
         providerTaskId: `demo-fixture-upload-${crypto.randomUUID()}`,
         sourceType: "cached_demo",

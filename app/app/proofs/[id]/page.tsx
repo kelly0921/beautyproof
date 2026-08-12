@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReceiptConsentButton } from "@/components/app/receipt-consent-button";
 import { DemoProgress } from "@/components/campaigns/demo-progress";
-import { getRepository } from "@/lib/data/repository-provider";
+import { getRequestRepository } from "@/lib/data/repository-provider";
 import { product } from "@/lib/product";
 import { analysisOriginLabel } from "@/lib/provenance";
 
@@ -14,7 +14,7 @@ export default async function AppProofDetailPage({ params, searchParams }: { par
   const { id } = await params;
   const query = await searchParams;
   const demoMode = query.demo === "1";
-  const repository = getRepository();
+  const repository = await getRequestRepository();
   const receipt = await repository.getReceipt(id);
   if (!receipt) notFound();
   const proofWindow = await repository.getWindow(receipt.proofWindowId);

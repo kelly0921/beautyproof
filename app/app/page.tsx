@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ResumeBaselineCard } from "@/components/app/resume-baseline-card";
-import { getRepository } from "@/lib/data/repository-provider";
+import { getRequestRepository } from "@/lib/data/repository-provider";
 import type { SkinAnalysis } from "@/lib/domain";
 import { product } from "@/lib/product";
 import { analysisOriginLabel } from "@/lib/provenance";
@@ -16,7 +16,7 @@ function metricLabel(metric: string) {
 }
 
 export default async function AppHomePage() {
-  const repository = getRepository();
+  const repository = await getRequestRepository();
   let windows: Awaited<ReturnType<typeof repository.listWindows>> = [];
   let receipts: Awaited<ReturnType<typeof repository.listReceipts>> = [];
   let campaigns: Awaited<ReturnType<typeof repository.listCampaigns>> = [];
@@ -46,8 +46,8 @@ export default async function AppHomePage() {
   return (
     <div className="app-screen app-dashboard">
       <section className="app-greeting">
-        <div><p className="app-kicker">{new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date())}</p><h1>Morning, Kelly.</h1><p>Your skincare evidence is organized around what you need to do next.</p></div>
-        <Link className="app-avatar app-avatar-desktop" href="/app/profile">KC</Link>
+        <div><p className="app-kicker">{new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date())}</p><h1>Welcome back.</h1><p>Your skincare evidence is organized around what you need to do next.</p></div>
+        <Link className="app-avatar app-avatar-desktop" href="/app/profile">BP</Link>
       </section>
       {!dataAvailable ? <div className="app-data-warning"><strong>Your app is available.</strong><span>Stored evidence could not be refreshed just now. New records remain protected; retry by refreshing.</span></div> : null}
       {resumableBaseline ? <ResumeBaselineCard analysis={{ id: resumableBaseline.id, capturedAt: resumableBaseline.capturedAt, origin: resumableBaseline.origin, moistureScore: resumableBaseline.metrics.hd_moisture }} blockedByActiveTrial={Boolean(activeWindow)} /> : null}

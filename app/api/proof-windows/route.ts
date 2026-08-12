@@ -1,4 +1,4 @@
-import { getRepository } from "@/lib/data/repository-provider";
+import { getRepositoryForRequest } from "@/lib/data/repository-provider";
 import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 import { apiError, windowSchema } from "@/lib/validation/api";
 
@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   if (rejected) return rejected;
   const parsed = windowSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("INVALID_PROOF_WINDOW", "ProofWindow input is invalid.", 400, parsed.error.flatten());
-  const repository = getRepository();
+  const repository = getRepositoryForRequest(request);
   try {
     if (parsed.data.campaignEnrollmentId) {
       const [enrollment, baseline, windows] = await Promise.all([
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
     return Response.json({ ok: true, data: linked ?? record }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "BASELINE_ANALYSIS_NOT_FOUND") return apiError("BASELINE_ANALYSIS_NOT_FOUND", "Create a stored baseline analysis before starting a ProofWindow.", 409);
+    if (error instanceof Error && error.message === "ACTIVE_PROOF_WINDOW_EXISTS") return apiError(error.message, "Finish or withdraw from your active ProofWindow before starting another.", 409);
     if (error instanceof Error && error.message === "CAMPAIGN_ENROLLMENT_ALREADY_LINKED") return apiError(error.message, "This enrollment already has a ProofWindow.", 409);
     throw error;
   }

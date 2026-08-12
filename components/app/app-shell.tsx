@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="app-stage">
         <header className="app-mobile-header">
           <Link className="app-wordmark" href="/app"><span className="app-wordmark-mark">B</span><span>BeautyProof</span></Link>
-          <Link className="app-avatar" href="/app/profile" aria-label="Open profile">KC</Link>
+          <Link className="app-avatar" href="/app/profile" aria-label="Open profile">BP</Link>
         </header>
         <main className="app-main">{children}</main>
         <nav className="app-bottom-nav" aria-label="App navigation">

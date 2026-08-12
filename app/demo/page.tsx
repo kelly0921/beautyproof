@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 import { CampaignDemoStart } from "@/components/campaigns/campaign-demo-start";
-import { getRepository } from "@/lib/data/repository-provider";
+import { getRequestRepository } from "@/lib/data/repository-provider";
 import { aggregateReceipts } from "@/lib/evidence/aggregates";
 import { seededReceipts } from "@/lib/seed";
 
 export const dynamic = "force-dynamic";
 
 export default async function DemoPage() {
-  const repository = getRepository();
+  const repository = await getRequestRepository();
   const campaign = await repository.getCampaign("campaign-dewsignal-hydration-2026");
   if (!campaign) notFound();
   const coverage = await repository.campaignCoverage(campaign.id);

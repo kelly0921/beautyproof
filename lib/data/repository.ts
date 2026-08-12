@@ -18,9 +18,15 @@ export interface ProofWindowRecord {
   startDate: string;
   plannedEndDate: string;
   returnDeadline: string;
-  status: "active" | "complete";
+  status: "active" | "complete" | "withdrawn";
   campaignEnrollmentId?: string;
   checkIns: { date: string; usedProduct: boolean; experience: Experience; confounderNote?: string }[];
+}
+
+export interface PublicProofContribution {
+  receipt: ProofReceiptRecord;
+  proofWindow: ProofWindowRecord;
+  campaignId?: string;
 }
 
 export interface BeautyProofRepository {
@@ -40,6 +46,7 @@ export interface BeautyProofRepository {
   listWindows(): Promise<ProofWindowRecord[]>;
   addCheckIn(id: string, input: ProofWindowRecord["checkIns"][number]): Promise<ProofWindowRecord | null>;
   completeWindow(id: string): Promise<ProofWindowRecord | null>;
+  withdrawWindow(id: string): Promise<ProofWindowRecord | null>;
   createEnrollment(input: {
     campaignId: string;
     userId: string;
@@ -58,6 +65,7 @@ export interface BeautyProofRepository {
   getReceipt(id: string): Promise<ProofReceiptRecord | null>;
   getReceiptByWindow(proofWindowId: string): Promise<ProofReceiptRecord | null>;
   listReceipts(): Promise<ProofReceiptRecord[]>;
+  listPublicContributions(): Promise<PublicProofContribution[]>;
   consentReceipt(id: string): Promise<{ receiptId: string; consented: boolean; networkDelta: number }>;
   coverage(): Promise<{ contributedReal: number; networkDelta: number; storedAnalyses: number; storedWindows: number; storedReceipts: number }>;
   campaignCoverage(campaignId: string): Promise<CampaignCoverage | null>;

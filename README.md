@@ -100,6 +100,7 @@ The app works without external credentials through memory persistence and clearl
 | `NEXT_PUBLIC_APP_URL` | Recommended | Canonical application URL. |
 | `SUPABASE_URL` | Durable persistence | Supabase project URL used by the server repository. |
 | `SUPABASE_SECRET_KEY` | Durable persistence | Preferred `sb_secret_...` server key. Never expose with `NEXT_PUBLIC_`. |
+| `BEAUTYPROOF_SESSION_SECRET` | Recommended in production | Random server-only value used to sign the HttpOnly browser session that scopes personal evidence. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Legacy fallback | Accepted only when the newer server secret is unavailable. |
 | `DATABASE_URL` | Migration tooling | PostgreSQL connection string. |
 | `DEMO_MODE` | No | Enables labeled server demo behavior. |
@@ -107,6 +108,8 @@ The app works without external credentials through memory persistence and clearl
 | `DEMO_SEED` | No | Defaults to `20260804`. |
 
 No new secret is required for Proof Campaigns. Campaign configuration and the reward ledger are database records.
+
+Personal scans, ProofWindows, enrollments, rewards, and ProofReceipts are scoped to a signed HttpOnly browser session. The Worker uses `BEAUTYPROOF_SESSION_SECRET` when configured and falls back to the Supabase server secret for backward-compatible local setup. Clearing site data starts a new private space; only receipts explicitly consented for aggregation enter public ProofMap queries.
 
 ## YouCam live setup
 

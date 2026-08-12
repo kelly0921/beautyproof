@@ -1,5 +1,5 @@
 import { CampaignServiceError, freshCampaignEligibility } from "@/lib/campaigns/service";
-import { getRepository } from "@/lib/data/repository-provider";
+import { getRepositoryForRequest } from "@/lib/data/repository-provider";
 import { rejectUnsafeMutation } from "@/lib/security/same-origin";
 import { apiError, campaignEnrollmentSchema } from "@/lib/validation/api";
 
@@ -9,7 +9,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   const parsed = campaignEnrollmentSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("CAMPAIGN_CONSENT_REQUIRED", "Accept the outcome-neutral campaign terms before enrollment.", 400, parsed.error.flatten());
-  const repository = getRepository();
+  const repository = getRepositoryForRequest(request);
   try {
     const { result, analysis } = await freshCampaignEligibility(repository, id, parsed.data.baselineAnalysisId);
     if (!result.eligible) return apiError("CAMPAIGN_INELIGIBLE", "This starting measurement does not match the current campaign evidence gap.", 409, result);

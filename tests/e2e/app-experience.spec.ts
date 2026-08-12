@@ -4,7 +4,7 @@ test("mobile app shell keeps the primary product actions one tap away", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/app");
 
-  await expect(page.getByRole("heading", { name: /Morning, Kelly/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Welcome back/i })).toBeVisible();
   await expect(page.locator(".app-bottom-nav")).toBeVisible();
 
   await page.getByRole("link", { name: "Scan", exact: true }).click();
@@ -19,7 +19,7 @@ test("mobile app shell keeps the primary product actions one tap away", async ({
 
   await page.getByRole("link", { name: "Profile", exact: true }).click();
   await expect(page).toHaveURL(/\/app\/profile$/);
-  await expect(page.getByRole("heading", { name: "Kelly Chen" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "This browser session" })).toBeVisible();
   await expect(page.getByText("YouCam Skin AI", { exact: true })).toBeVisible();
   await expect(page.getByText("Supabase", { exact: true })).toBeVisible();
 });
@@ -34,6 +34,7 @@ test("follow-up photo selection offers the iPhone camera or photo library", asyn
   await page.request.post(`/api/proof-windows/${proofWindow.data.id}/check-ins`, { data: { date: dateAfter(7), usedProduct: true, experience: "good" } });
 
   await page.goto(`/app/trial/${proofWindow.data.id}`);
-  await page.getByRole("button", { name: /Demo time jump/i }).click();
-  await expect(page.getByLabel("Choose or take a follow-up photo")).not.toHaveAttribute("capture");
+  await expect(page.getByRole("button", { name: /Demo time jump/i })).toHaveCount(0);
+  await expect(page.getByText(/Come back on/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /End this trial/i })).toBeVisible();
 });

@@ -1,4 +1,4 @@
-import { getRepository } from "@/lib/data/repository-provider";
+import { getRepositoryForRequest } from "@/lib/data/repository-provider";
 import { apiError, completeWindowSchema } from "@/lib/validation/api";
 import { evidenceQuality } from "@/lib/evidence/quality";
 import { determineVerdict } from "@/lib/evidence/verdict";
@@ -11,7 +11,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   const parsed = completeWindowSchema.safeParse(await request.json());
   if (!parsed.success) return apiError("INVALID_COMPLETION", "ProofWindow completion input is invalid.", 400, parsed.error.flatten());
-  const repository = getRepository();
+  const repository = getRepositoryForRequest(request);
   const record = await repository.getWindow(id);
   if (!record) return apiError("PROOF_WINDOW_NOT_FOUND", "The ProofWindow was not found.", 404);
   const existingReceipt = await repository.getReceiptByWindow(record.id);
@@ -23,6 +23,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     ]);
     return Response.json({ ok: true, data: { proofWindow: record, receipt: existingReceipt, analyses: { baseline, followup }, campaign: campaignCompletion, persistence: repository.mode, idempotent: true } });
   }
+  if (record.status !== "active") return apiError("PROOF_WINDOW_NOT_ACTIVE", "Only an active ProofWindow can be completed.", 409);
   const baselineAnalysis = await repository.getAnalysis(record.baselineAnalysisId);
   const followupAnalysis = await repository.getAnalysis(parsed.data.followupAnalysisId);
   if (!baselineAnalysis || !followupAnalysis) return apiError("ANALYSIS_NOT_FOUND", "Both stored baseline and follow-up analyses are required.", 409);

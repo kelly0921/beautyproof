@@ -52,7 +52,7 @@ test("judge completes the outcome-neutral sponsored Proof Campaign loop", async 
 
   await expect(page).toHaveURL(/\/brand\/campaigns\/campaign-dewsignal-hydration-2026\?updated=1/);
   await expect(page.getByText("6 / 6", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /proof becomes reusable/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /trial.*proof becomes reusable/i })).toBeVisible();
   await expect(page.getByText(/Campaign coverage updated/i)).toBeVisible();
   await expect(page.getByText(/Rewards earned/i)).toBeVisible();
   await expect(page.getByText("Shopper ProofMap", { exact: true }).locator("..")).toContainText("0 real · 1 demo");

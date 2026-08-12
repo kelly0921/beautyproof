@@ -1,6 +1,6 @@
 import baseline from "@/lib/youcam/fixtures/baseline.json";
 import followup from "@/lib/youcam/fixtures/followup.json";
-import { getRepository } from "@/lib/data/repository-provider";
+import { getRepositoryForRequest } from "@/lib/data/repository-provider";
 import { demoFollowups } from "@/lib/demo";
 import { parseYouCamResult } from "@/lib/youcam/parser";
 import type { YouCamTaskResponse } from "@/lib/youcam/types";
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const result = parseYouCamResult(fixture as YouCamTaskResponse);
   if (parsed.data.kind === "followup") result.metrics = demoFollowups[parsed.data.scenario];
   const taskId = `demo-fixture-${parsed.data.kind}-${parsed.data.scenario}-${crypto.randomUUID()}`;
-  const repository = getRepository();
+  const repository = getRepositoryForRequest(request);
   const analysis = await repository.saveAnalysis({
     providerTaskId: taskId,
     sourceType: "cached_demo",

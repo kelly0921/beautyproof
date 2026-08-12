@@ -17,17 +17,13 @@ export default async function BrandCampaignPage({ params, searchParams }: { para
   const repository = getRepository();
   const campaign = await repository.getCampaign(id);
   if (!campaign) notFound();
-  const [brand, coverage, enrollments, windows, receipts] = await Promise.all([
+  const [brand, coverage, publicContributions] = await Promise.all([
     repository.getBrand(campaign.brandId),
     repository.campaignCoverage(id),
-    repository.listEnrollments(),
-    repository.listWindows(),
-    repository.listReceipts(),
+    repository.listPublicContributions(),
   ]);
   if (!brand || !coverage) notFound();
-  const campaignEnrollmentIds = new Set(enrollments.filter((enrollment) => enrollment.campaignId === id).map((enrollment) => enrollment.id));
-  const campaignWindowIds = new Set(windows.filter((window) => window.campaignEnrollmentId && campaignEnrollmentIds.has(window.campaignEnrollmentId)).map((window) => window.id));
-  const publicCampaignReceipts = receipts.filter((receipt) => receipt.consentToAggregate && campaignWindowIds.has(receipt.proofWindowId));
+  const publicCampaignReceipts = publicContributions.filter((contribution) => contribution.campaignId === id).map((contribution) => contribution.receipt);
   const publicProofMapRealCount = publicCampaignReceipts.filter((receipt) => receipt.origin === "real").length;
   const publicProofMapDemoCount = publicCampaignReceipts.filter((receipt) => receipt.origin === "synthetic").length;
   const historical = aggregateReceipts(seededReceipts, "formula-2024-original", campaign.claimId);
