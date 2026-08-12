@@ -34,12 +34,12 @@ export default async function AppHomePage() {
   let resumableBaseline: SkinAnalysis | null = null;
   try {
     const analyses = await repository.listAnalyses();
-    baseline = activeWindow ? await repository.getAnalysis(activeWindow.baselineAnalysisId) : analyses[0] ?? null;
+    baseline = analyses[0] ?? (activeWindow ? await repository.getAnalysis(activeWindow.baselineAnalysisId) : null);
     const linkedAnalysisIds = new Set([
       ...windows.map((window) => window.baselineAnalysisId),
       ...receipts.flatMap((receipt) => [receipt.baselineAnalysisId, receipt.followupAnalysisId]),
     ]);
-    resumableBaseline = !activeWindow ? analyses.find((analysis) => !linkedAnalysisIds.has(analysis.id)) ?? null : null;
+    resumableBaseline = analyses.find((analysis) => !linkedAnalysisIds.has(analysis.id)) ?? null;
   } catch { dataAvailable = false; }
   const currentDay = activeWindow?.checkIns.length ? 7 : 1;
 
@@ -50,7 +50,7 @@ export default async function AppHomePage() {
         <Link className="app-avatar app-avatar-desktop" href="/app/profile">KC</Link>
       </section>
       {!dataAvailable ? <div className="app-data-warning"><strong>Your app is available.</strong><span>Stored evidence could not be refreshed just now. New records remain protected; retry by refreshing.</span></div> : null}
-      {resumableBaseline ? <ResumeBaselineCard analysis={resumableBaseline} /> : null}
+      {resumableBaseline ? <ResumeBaselineCard analysis={resumableBaseline} blockedByActiveTrial={Boolean(activeWindow)} /> : null}
 
       {heroCampaign ? <Link className="app-opportunity-card" href={`/app/campaigns/${heroCampaign.id}`}><div><span className="app-sponsored-badge">Sponsored Proof Trial · fictional demo brand</span><p className="app-kicker">Aster Vale · current 2026 formula</p><h2>Earn $15 for completing a hydration ProofWindow.</h2><p>Moisture starting range ≤ 60 · 14 days · reward independent of outcome</p></div><aside><span>{heroCampaign.status === "active" ? "Opportunity open" : "Preview opportunity"}</span><strong>$15</strong><small>store credit · demo ledger</small></aside><b>Check eligibility →</b></Link> : null}
 

@@ -473,6 +473,7 @@ body:has(.app-experience) > .site-shell > .footer { display: none; }
 .app-resume-baseline h2 { margin: 5px 0; font-size: 1.25rem; }
 .app-resume-baseline p:last-child { margin: 0; color: var(--app-muted); font-size: .7rem; }
 .app-resume-baseline small { grid-column: 1 / -1; color: #9b3838; }
+.app-resume-baseline .app-resume-note { color: var(--app-muted); }
 .app-consent-row { display: flex; gap: 11px; align-items: flex-start; margin: 16px 0; padding: 14px; border-radius: 13px; background: #f1f3ef; color: var(--app-muted); font-size: .69rem; }
 .app-consent-row input { width: 19px; height: 19px; flex: 0 0 auto; accent-color: var(--app-green); }
 .app-consent-row strong { display: block; color: var(--app-ink); }
