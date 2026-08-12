@@ -2,13 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { SkinAnalysis } from "@/lib/domain";
+import type { AnalysisOrigin } from "@/lib/domain";
 import { analysisOriginLabel } from "@/lib/provenance";
 
 function dateString(date: Date) { return date.toISOString().slice(0, 10); }
 function addDays(date: Date, days: number) { const result = new Date(date); result.setUTCDate(result.getUTCDate() + days); return result; }
 
-export function ResumeBaselineCard({ analysis, blockedByActiveTrial = false }: { analysis: SkinAnalysis; blockedByActiveTrial?: boolean }) {
+export interface ResumableBaselineSummary {
+  id: string;
+  capturedAt: string;
+  origin: AnalysisOrigin;
+  moistureScore: number;
+}
+
+export function ResumeBaselineCard({ analysis, blockedByActiveTrial = false }: { analysis: ResumableBaselineSummary; blockedByActiveTrial?: boolean }) {
   const router = useRouter();
   const [status, setStatus] = useState<"idle" | "starting" | "error">("idle");
 
@@ -31,7 +38,7 @@ export function ResumeBaselineCard({ analysis, blockedByActiveTrial = false }: {
   }
 
   return <section className="app-resume-baseline">
-    <div><span className="app-origin-badge"><i />{analysisOriginLabel(analysis.origin)}</span><p className="app-kicker">Saved starting measurement</p><h2>{blockedByActiveTrial ? "Your latest scan is saved." : "Continue from your latest baseline."}</h2><p>{analysis.metrics.hd_moisture.toFixed(1)} moisture raw score · captured {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(analysis.capturedAt))}</p></div>
+    <div><span className="app-origin-badge"><i />{analysisOriginLabel(analysis.origin)}</span><p className="app-kicker">Saved starting measurement</p><h2>{blockedByActiveTrial ? "Your latest scan is saved." : "Continue from your latest baseline."}</h2><p>{analysis.moistureScore.toFixed(1)} moisture raw score · captured {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(analysis.capturedAt))}</p></div>
     <button className="app-primary-action" disabled={blockedByActiveTrial || status === "starting"} onClick={resume} type="button">{blockedByActiveTrial ? "Finish active ProofWindow first" : status === "starting" ? "Starting…" : "Start 14-day ProofWindow →"}</button>
     {blockedByActiveTrial ? <small className="app-resume-note">BeautyProof keeps one active product trial at a time so the evidence does not overlap.</small> : null}
     {status === "error" ? <small>That baseline could not be resumed. Refresh and try again.</small> : null}
