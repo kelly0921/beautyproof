@@ -22,6 +22,13 @@ test("mobile app shell keeps the primary product actions one tap away", async ({
   await expect(page.getByRole("heading", { name: "This browser session" })).toBeVisible();
   await expect(page.getByText("YouCam Skin AI", { exact: true })).toBeVisible();
   await expect(page.getByText("Supabase", { exact: true })).toBeVisible();
+
+  await page.getByRole("link", { name: /Where the information comes from/i }).click();
+  await expect(page).toHaveURL(/\/app\/data-sources$/);
+  await expect(page.getByRole("heading", { name: /Where the information comes from/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Curated fictional catalog" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "YouCam Skin Analysis v2.1" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Disclosed synthetic records" })).toBeVisible();
 });
 
 test("follow-up photo selection offers the iPhone camera or photo library", async ({ page }) => {
@@ -37,4 +44,12 @@ test("follow-up photo selection offers the iPhone camera or photo library", asyn
   await expect(page.getByRole("button", { name: /Demo time jump/i })).toHaveCount(0);
   await expect(page.getByText(/Come back on/i)).toBeVisible();
   await expect(page.getByRole("button", { name: /End this trial/i })).toBeVisible();
+});
+
+test("brand campaign navigation does not overflow a mobile viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/brand/campaigns/campaign-dewsignal-hydration-2026");
+  await expect(page.getByRole("heading", { name: /The formula changed/i })).toBeVisible();
+  const dimensions = await page.evaluate(() => ({ clientWidth: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
+  expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
 });

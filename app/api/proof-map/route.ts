@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       consentToAggregate: true,
       origin: receipt.origin,
       durationDays: 14,
-      routineStable: !receipt.evidenceReasons.some((reason) => reason.label === "Routine stayed stable" && !reason.earned),
+      routineStable: !receipt.evidenceReasons.some((reason) => reason.label.includes("Routine") && !reason.earned),
       capturesValid: receipt.evidenceQuality !== "inconclusive",
     }];
   });

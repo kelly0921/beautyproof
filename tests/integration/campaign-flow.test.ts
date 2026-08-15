@@ -22,6 +22,31 @@ function request(path: string, body: unknown) {
   return new Request(`http://test${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 }
 
+type DemoScenario = "keep" | "swap" | "inconclusive";
+
+async function prepareCampaignTrial(scenario: DemoScenario) {
+  await updateCampaign(request(`/api/proof-campaigns/${campaignId}`, { status: "active" }), params(campaignId));
+  const baselineResponse = await createCachedAnalysis(request("/api/skin-analysis/tasks", { kind: "baseline", scenario: "keep", allowCachedFallback: true }));
+  const baseline = await json<{ analysis: { id: string } }>(baselineResponse);
+  const enrollmentResponse = await enrollCampaign(request(`/api/proof-campaigns/${campaignId}/enroll`, { baselineAnalysisId: baseline.data.analysis.id, campaignConsent: true }), params(campaignId));
+  const enrolled = await json<{ enrollment: { id: string }; reward: { id: string; status: string } }>(enrollmentResponse);
+  const windowResponse = await createProofWindow(request("/api/proof-windows", {
+    formulaVersionId: "formula-2026-us",
+    claimId: "claim-hydration-2026",
+    baselineAnalysisId: baseline.data.analysis.id,
+    campaignEnrollmentId: enrolled.data.enrollment.id,
+    startDate: "2026-08-10",
+    plannedEndDate: "2026-08-24",
+    returnDeadline: "2026-09-09",
+    status: "active",
+  }));
+  const proofWindow = await json<{ id: string }>(windowResponse);
+  await addCheckIn(request("/check-in", { date: "2026-08-17", usedProduct: true, experience: scenario === "swap" ? "neutral" : "good" }), params(proofWindow.data.id));
+  const followupResponse = await createCachedAnalysis(request("/api/skin-analysis/tasks", { kind: "followup", scenario, allowCachedFallback: true }));
+  const followup = await json<{ analysis: { id: string } }>(followupResponse);
+  return { enrollmentId: enrolled.data.enrollment.id, rewardId: enrolled.data.reward.id, windowId: proofWindow.data.id, followupAnalysisId: followup.data.analysis.id };
+}
+
 describe("sponsored Proof Campaign loop", () => {
   beforeEach(async () => await demoRepository.reset());
 
@@ -67,7 +92,7 @@ describe("sponsored Proof Campaign loop", () => {
 
     const followupResponse = await createCachedAnalysis(request("/api/skin-analysis/tasks", { kind: "followup", scenario: "keep", allowCachedFallback: true }));
     const followup = await json<{ analysis: { id: string } }>(followupResponse);
-    const completionRequest = () => request("/complete", { scenario: "keep", followupAnalysisId: followup.data.analysis.id, experience: "good", majorConfounder: false, demoTimeJump: true });
+    const completionRequest = () => request("/complete", { scenario: "keep", followupAnalysisId: followup.data.analysis.id, completedUses: 13, experience: "good", majorConfounder: false, demoTimeJump: true });
     const completionResponse = await completeProofWindow(completionRequest(), params(windowPayload.data.id));
     const completion = await json<{ receipt: { id: string; consentToAggregate: boolean; origin: string }; campaign: { reward: { status: string } }; idempotent: boolean }>(completionResponse);
     expect(completion.data).toMatchObject({ receipt: { consentToAggregate: false, origin: "synthetic" }, campaign: { reward: { status: "earned" } }, idempotent: false });
@@ -89,5 +114,41 @@ describe("sponsored Proof Campaign loop", () => {
     expect((await demoRepository.coverage()).contributedReal).toBe(0);
     const publicProofMap = await json<{ publicContributedReceipts: number; publicContributedRealReceipts: number; publicContributedDemoReceipts: number }>(await getProofMap(new Request("http://test/api/proof-map")));
     expect(publicProofMap.data).toMatchObject({ publicContributedReceipts: 1, publicContributedRealReceipts: 0, publicContributedDemoReceipts: 1 });
+  });
+
+  it.each([
+    { scenario: "swap", expectedVerdict: "swap" },
+    { scenario: "inconclusive", expectedVerdict: "inconclusive" },
+  ] satisfies { scenario: DemoScenario; expectedVerdict: string }[])("earns after a valid $scenario outcome without treating outcome as protocol quality", async ({ scenario, expectedVerdict }) => {
+    const prepared = await prepareCampaignTrial(scenario);
+    const completionResponse = await completeProofWindow(request("/complete", {
+      scenario,
+      followupAnalysisId: prepared.followupAnalysisId,
+      completedUses: 13,
+      experience: scenario === "swap" ? "neutral" : "good",
+      majorConfounder: false,
+      demoTimeJump: true,
+    }), params(prepared.windowId));
+    const completion = await json<{ receipt: { verdict: string; adherenceRate: number }; campaign: { reward: { status: string } } }>(completionResponse);
+    expect(completionResponse.status).toBe(200);
+    expect(completion.data).toMatchObject({ receipt: { verdict: expectedVerdict, adherenceRate: 13 / 14 }, campaign: { reward: { status: "earned" } } });
+  });
+
+  it("keeps the reward pending and stores no receipt when adherence is below the sponsored protocol threshold", async () => {
+    const prepared = await prepareCampaignTrial("keep");
+    const completionResponse = await completeProofWindow(request("/complete", {
+      scenario: "keep",
+      followupAnalysisId: prepared.followupAnalysisId,
+      completedUses: 7,
+      experience: "good",
+      majorConfounder: false,
+      demoTimeJump: true,
+    }), params(prepared.windowId));
+    const completion = await completionResponse.json() as { ok: boolean; error: { code: string; details: { adherenceRate: number } } };
+    expect(completionResponse.status).toBe(409);
+    expect(completion).toMatchObject({ ok: false, error: { code: "CAMPAIGN_PROTOCOL_INCOMPLETE", details: { adherenceRate: 0.5 } } });
+    expect(await demoRepository.getReceiptByWindow(prepared.windowId)).toBeNull();
+    expect(await demoRepository.getWindow(prepared.windowId)).toMatchObject({ status: "active" });
+    expect(await demoRepository.getReward(prepared.rewardId)).toMatchObject({ status: "pending" });
   });
 });

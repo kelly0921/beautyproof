@@ -2,8 +2,30 @@ import { getRepositoryForRequest } from "@/lib/data/repository-provider";
 import { apiError, completeWindowSchema } from "@/lib/validation/api";
 import { evidenceQuality } from "@/lib/evidence/quality";
 import { determineVerdict } from "@/lib/evidence/verdict";
-import { rewardEarnedAfterStoredReceipt } from "@/lib/campaigns/rewards";
+import { protocolEligibleForReward, rewardEarnedAfterStoredReceipt } from "@/lib/campaigns/rewards";
 import { rejectUnsafeMutation } from "@/lib/security/same-origin";
+import type { ProofReceiptRecord } from "@/lib/domain";
+import type { ProofWindowRecord } from "@/lib/data/repository";
+
+const durationReason = "Claim-aligned duration completed";
+const captureReason = "Baseline and follow-up captures valid";
+
+function dateValue(value: string) {
+  return Date.parse(`${value}T00:00:00.000Z`);
+}
+
+function plannedUses(record: ProofWindowRecord) {
+  return Math.max(1, Math.round((dateValue(record.plannedEndDate) - dateValue(record.startDate)) / 86_400_000));
+}
+
+function receiptProtocolValid(record: ProofWindowRecord, receipt: ProofReceiptRecord) {
+  return protocolEligibleForReward({
+    durationComplete: receipt.evidenceReasons.some((reason) => reason.label === durationReason && reason.earned),
+    adherenceRate: receipt.adherenceRate,
+    capturesValid: receipt.evidenceReasons.some((reason) => reason.label === captureReason && reason.earned),
+    checkInRecorded: record.checkIns.length > 0,
+  });
+}
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const rejected = rejectUnsafeMutation(request);
@@ -16,10 +38,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!record) return apiError("PROOF_WINDOW_NOT_FOUND", "The ProofWindow was not found.", 404);
   const existingReceipt = await repository.getReceiptByWindow(record.id);
   if (existingReceipt) {
+    const protocolValid = receiptProtocolValid(record, existingReceipt);
     const [baseline, followup, campaignCompletion] = await Promise.all([
       repository.getAnalysis(existingReceipt.baselineAnalysisId),
       repository.getAnalysis(existingReceipt.followupAnalysisId),
-      record.campaignEnrollmentId ? repository.completeCampaignEnrollment(record.campaignEnrollmentId) : Promise.resolve(null),
+      record.campaignEnrollmentId && rewardEarnedAfterStoredReceipt({ receiptStored: true, protocolValid, verdict: existingReceipt.verdict, consentToAggregate: existingReceipt.consentToAggregate })
+        ? repository.completeCampaignEnrollment(record.campaignEnrollmentId)
+        : Promise.resolve(null),
     ]);
     return Response.json({ ok: true, data: { proofWindow: record, receipt: existingReceipt, analyses: { baseline, followup }, campaign: campaignCompletion, persistence: repository.mode, idempotent: true } });
   }
@@ -27,16 +52,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const baselineAnalysis = await repository.getAnalysis(record.baselineAnalysisId);
   const followupAnalysis = await repository.getAnalysis(parsed.data.followupAnalysisId);
   if (!baselineAnalysis || !followupAnalysis) return apiError("ANALYSIS_NOT_FOUND", "Both stored baseline and follow-up analyses are required.", 409);
-  const protocolElapsed = Date.now() >= Date.parse(`${record.plannedEndDate}T00:00:00.000Z`);
+  const protocolElapsed = Date.now() >= dateValue(record.plannedEndDate);
   if (!protocolElapsed && !parsed.data.demoTimeJump) return apiError("PROOF_WINDOW_NOT_READY", "The planned observation window has not elapsed. Use the explicitly labeled demo time jump only for a synthetic prototype receipt.", 409);
 
   const scenario = parsed.data.scenario;
-  const adherenceRate = scenario === "inconclusive" ? 0.54 : 13 / 14;
-  const durationComplete = scenario !== "inconclusive";
-  const capturesValid = baselineAnalysis.validity.valid && followupAnalysis.validity.valid && scenario !== "inconclusive";
-  const quality = evidenceQuality({ exactFormula: true, durationComplete, adherenceRate, routineStable: !parsed.data.majorConfounder, majorConfounder: parsed.data.majorConfounder || scenario === "inconclusive", capturesValid });
+  const expectedUses = plannedUses(record);
+  if (parsed.data.completedUses > expectedUses) return apiError("INVALID_ADHERENCE", `Completed uses cannot exceed the ${expectedUses}-use plan.`, 400, { completedUses: parsed.data.completedUses, plannedUses: expectedUses });
+  const adherenceRate = parsed.data.completedUses / expectedUses;
+  const durationComplete = protocolElapsed || parsed.data.demoTimeJump;
+  const capturesValid = baselineAnalysis.validity.valid && followupAnalysis.validity.valid;
+  const protocolValid = protocolEligibleForReward({ durationComplete, adherenceRate, capturesValid, checkInRecorded: record.checkIns.length > 0 });
+  if (record.campaignEnrollmentId && !protocolValid) {
+    return apiError("CAMPAIGN_PROTOCOL_INCOMPLETE", "This sponsored ProofWindow has not met the completion requirements, so no receipt or reward was issued.", 409, {
+      durationComplete,
+      completedUses: parsed.data.completedUses,
+      plannedUses: expectedUses,
+      adherenceRate,
+      minimumAdherenceRate: 0.8,
+      capturesValid,
+      checkInRecorded: record.checkIns.length > 0,
+    });
+  }
+  const quality = evidenceQuality({ exactFormula: true, durationComplete, adherenceRate, routineStable: !parsed.data.majorConfounder, majorConfounder: parsed.data.majorConfounder, capturesValid });
   const verdict = determineVerdict({ quality: quality.quality, durationComplete, experience: scenario === "swap" ? "neutral" : parsed.data.experience, primaryMetricDelta: followupAnalysis.metrics.hd_moisture - baselineAnalysis.metrics.hd_moisture, beforeReturnDeadline: true, strongerAlternativeAvailable: scenario === "swap" });
-  const sensoryNote = scenario === "swap" ? "Lightweight, but recurring pilling under sunscreen." : scenario === "inconclusive" ? "Neutral; routine changed during the window." : "Lightweight and comfortable; occasional pilling under sunscreen.";
+  const sensoryNote = scenario === "swap" ? "Lightweight, but recurring pilling under sunscreen." : scenario === "inconclusive" ? "Neutral; the measured change was too small to support a keep or swap decision." : "Lightweight and comfortable; occasional pilling under sunscreen.";
   const receipt = await repository.saveReceipt({
     proofWindowId: record.id,
     baselineAnalysisId: baselineAnalysis.id,
@@ -54,7 +93,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     origin: parsed.data.demoTimeJump || !protocolElapsed || baselineAnalysis.origin === "synthetic" || followupAnalysis.origin === "synthetic" ? "synthetic" : "real",
   });
   await repository.completeWindow(id);
-  const campaignCompletion = record.campaignEnrollmentId && rewardEarnedAfterStoredReceipt({ receiptStored: true, verdict: receipt.verdict, consentToAggregate: receipt.consentToAggregate })
+  const campaignCompletion = record.campaignEnrollmentId && rewardEarnedAfterStoredReceipt({ receiptStored: true, protocolValid, verdict: receipt.verdict, consentToAggregate: receipt.consentToAggregate })
     ? await repository.completeCampaignEnrollment(record.campaignEnrollmentId)
     : null;
   return Response.json({ ok: true, data: { proofWindow: await repository.getWindow(id), receipt, analyses: { baseline: baselineAnalysis, followup: followupAnalysis }, campaign: campaignCompletion, persistence: repository.mode, idempotent: false } });

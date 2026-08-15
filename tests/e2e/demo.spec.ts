@@ -40,6 +40,8 @@ test("judge completes the outcome-neutral sponsored Proof Campaign loop", async 
   await expect(page.getByText(/Reward status/i)).toBeVisible();
   await page.getByRole("button", { name: /Save check-in/i }).click();
   await page.getByRole("button", { name: /Demo time jump/i }).click();
+  await expect(page.getByLabel("Planned uses completed")).toHaveValue("13");
+  await expect(page.getByText(/80% required for a sponsored reward/i)).toBeVisible();
   await page.getByRole("button", { name: /Use simulated demo follow-up/i }).click();
 
   await expect(page).toHaveURL(/\/app\/proofs\//);
@@ -47,6 +49,19 @@ test("judge completes the outcome-neutral sponsored Proof Campaign loop", async 
   await expect(page.getByText("Sponsored Proof Trial", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: /Reward earned for completing/i })).toBeVisible();
   await expect(page.getByText(/no funds moved/i)).toBeVisible();
+  await expect(page.getByText("Trial dates", { exact: true })).toBeVisible();
+  await expect(page.getByText("Routine and confounders", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /High-confidence personal observation/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Measurement and context stay separate/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Share ProofReceipt" })).toBeVisible();
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download image" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^BeautyProof-.*\.png$/);
+  const downloadedReceiptPath = await download.path();
+  expect(downloadedReceiptPath).not.toBeNull();
+  const downloadedReceiptSize = (await import("node:fs/promises")).stat(downloadedReceiptPath!);
+  expect((await downloadedReceiptSize).size).toBeGreaterThan(50_000);
   await page.getByRole("button", { name: /I understand.*add demo receipt/i }).click();
   await page.getByRole("link", { name: /See updated campaign coverage/i }).click();
 

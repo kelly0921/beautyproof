@@ -112,6 +112,14 @@ try {
   await page.getByRole("heading", { name: /Reward earned for completing/i }).waitFor();
   await capture("05-proof-receipt-and-earned-reward.png");
 
+  await page.setViewportSize({ width: 390, height: 844 });
+  await capture("08-mobile-proof-receipt.png");
+  await page.goto(`${baseUrl}/app/data-sources`, { waitUntil: "networkidle" });
+  await page.getByRole("heading", { name: /Where the information comes from/i }).waitFor();
+  await capture("09-mobile-data-sources.png");
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goBack({ waitUntil: "networkidle" });
+
   await page.getByRole("button", { name: /I understand.*add demo receipt/i }).click();
   await page.getByRole("link", { name: /See updated campaign coverage/i }).click();
   await page.waitForURL(/\/brand\/campaigns\/campaign-dewsignal-hydration-2026\?updated=1/);

@@ -32,6 +32,7 @@ The reliable judge path has no external-service dependency. The official recordi
 - **`/app/campaigns/[id]` — sponsored opportunity:** Exact formula and claim, reward terms, cosmetic-analysis consent, explainable eligibility, enrollment, and sponsored ProofWindow creation.
 - **`/app/trial/[id]` — active trial:** Stored progress, sponsored provenance, reward state, check-in, labeled time jump, and live or simulated follow-up.
 - **`/app/proofs/[id]` — ProofReceipt:** Formula, claim, measurements, verdict, evidence quality, provenance, outcome-neutral reward, and separate shopper aggregation consent.
+- **`/app/data-sources` — trust and provenance:** Plain-language disclosure of curated product data, live YouCam measurements, synthetic network records, private session evidence, and prototype campaign/reward data.
 - **`/brand/campaigns/[id]` — brand campaign:** Formula-reset context, Claim Compiler boundaries, activation, prototype budget, campaign coverage, verdict distribution, evidence quality, origin disclosure, rewards, and shopper ProofMap contribution.
 - **`/demo` — guided judge journey:** A focused six-step path with persistent progress and explicit Brand/Consumer role changes, from funded evidence gap through campaign coverage.
 - **Original evidence surfaces:** `/products/dewsignal`, `/proof-map`, `/proof-window/*`, `/proof-receipt/*`, and `/proof-coverage` remain available.
@@ -110,6 +111,8 @@ The app works without external credentials through memory persistence and clearl
 No new secret is required for Proof Campaigns. Campaign configuration and the reward ledger are database records.
 
 Personal scans, ProofWindows, enrollments, rewards, and ProofReceipts are scoped to a signed HttpOnly browser session. The Worker uses `BEAUTYPROOF_SESSION_SECRET` when configured and falls back to the Supabase server secret for backward-compatible local setup. Clearing site data starts a new private space; only receipts explicitly consented for aggregation enter public ProofMap queries.
+
+Each completed ProofReceipt now includes trial dates, completed uses, return-window timing, routine/confounder context, evidence-quality reasons, measurement provenance, and limitations. It can be shared through the device share sheet or exported as a high-resolution PNG containing no face image.
 
 ## YouCam live setup
 

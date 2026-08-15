@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   if (rejected) return rejected;
   const form = await request.formData();
   const file = form.get("file");
-  const allowCachedFallback = form.get("allowCachedFallback") !== "false";
+  const allowCachedFallback = form.get("allowCachedFallback") === "true";
   const captureMode = form.get("captureMode") === "hdskincare" ? "hdskincare" : "upload";
   if (!(file instanceof File)) return apiError("FILE_REQUIRED", "Attach one JPG or PNG image.", 400);
   const bytes = new Uint8Array(await file.arrayBuffer());

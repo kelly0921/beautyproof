@@ -1,12 +1,13 @@
 import { z } from "zod";
 
 export const scenarioSchema = z.enum(["keep", "swap", "inconclusive"]);
-export const taskRequestSchema = z.object({ kind: z.enum(["baseline", "followup"]), scenario: scenarioSchema.default("keep"), allowCachedFallback: z.boolean().default(true) });
+export const taskRequestSchema = z.object({ kind: z.enum(["baseline", "followup"]), scenario: scenarioSchema.default("keep"), allowCachedFallback: z.boolean().default(false) });
 export const windowSchema = z.object({ formulaVersionId: z.literal("formula-2026-us"), claimId: z.literal("claim-hydration-2026"), baselineAnalysisId: z.string().min(1), startDate: z.string().date(), plannedEndDate: z.string().date(), returnDeadline: z.string().date(), status: z.literal("active"), campaignEnrollmentId: z.string().min(1).optional() });
 export const checkInSchema = z.object({ date: z.string().date(), usedProduct: z.boolean(), experience: z.enum(["good", "neutral", "concern"]), confounderNote: z.string().max(400).optional() });
 export const completeWindowSchema = z.object({
   scenario: scenarioSchema.default("keep"),
   followupAnalysisId: z.string().min(1),
+  completedUses: z.number().int().min(0).max(365),
   experience: z.enum(["good", "neutral", "concern"]).default("neutral"),
   majorConfounder: z.boolean().default(false),
   demoTimeJump: z.boolean().default(false),

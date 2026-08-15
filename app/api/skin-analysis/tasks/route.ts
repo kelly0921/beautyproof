@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     metrics: result.metrics,
     uiScores: result.uiScores,
     maskUrls: result.maskUrls,
-    validity: { valid: parsed.data.scenario !== "inconclusive", shortSide: 1600, lighting: parsed.data.scenario === "inconclusive" ? "unknown" : "good" },
+    validity: { valid: true, shortSide: 1600, lighting: "good" },
     origin: "synthetic",
   });
   return Response.json({ ok: true, data: { taskId, taskStatus: "success", result, analysis, origin: analysis.origin, label: "Simulated YouCam-format demo fixture", persistence: repository.mode } });

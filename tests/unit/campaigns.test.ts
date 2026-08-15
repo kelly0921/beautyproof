@@ -64,7 +64,11 @@ describe("Proof Campaign business rules", () => {
   });
 
   it.each(["keep", "return", "inconclusive"] satisfies Verdict[])("earns the outcome-neutral reward for %s after receipt storage", (verdict) => {
-    expect(rewardEarnedAfterStoredReceipt({ receiptStored: true, verdict, consentToAggregate: false })).toBe(true);
+    expect(rewardEarnedAfterStoredReceipt({ receiptStored: true, protocolValid: true, verdict, consentToAggregate: false })).toBe(true);
+  });
+
+  it("does not earn when a receipt exists without valid protocol completion", () => {
+    expect(rewardEarnedAfterStoredReceipt({ receiptStored: true, protocolValid: false, verdict: "inconclusive", consentToAggregate: false })).toBe(false);
   });
 
   it("keeps formula-2024 records out and separates synthetic from persisted origins", () => {

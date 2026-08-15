@@ -21,7 +21,7 @@ Re-check the live Devpost page immediately before submission because requirement
 - [ ] Complete functional repository URL with source, assets, setup, migrations, and tests.
 - [ ] Public MIT `LICENSE`, or private-repository access shared with the event contact.
 - [ ] Text description covering features, functionality, consumer value, and brand/retail value.
-- [ ] Updated screenshots showing the brand campaign, consumer eligibility, sponsored ProofWindow, reward-bearing ProofReceipt, campaign coverage, and mobile app.
+- [x] Updated local screenshot pack showing the brand campaign, consumer eligibility, sponsored ProofWindow, complete reward-bearing ProofReceipt, campaign coverage, mobile app, and provenance explanation. Upload to Devpost remains a submission action.
 - [ ] Public 1–3 minute end-to-end video on YouTube, Vimeo, or Youku.
 - [ ] Video explicitly names YouCam Skin Analysis v2.1 and shows the intended device experience.
 - [ ] Video is public, password-free, and contains no unlicensed media.
@@ -129,6 +129,8 @@ The generated sequence is:
 5. `/app/proofs/[id]` — Step 5 ProofReceipt and earned reward
 6. `/brand/campaigns/[id]?updated=1&demo=1` — Step 6 coverage, origins, rewards, and shopper consent count
 7. Mobile `/app` — sponsored opportunity card
+8. Mobile `/app/proofs/[id]` — complete ProofReceipt, provenance, and export actions
+9. Mobile `/app/data-sources` — transparent source and prototype-boundary explanation
 
 ## External fields still needed
 

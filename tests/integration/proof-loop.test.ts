@@ -57,14 +57,14 @@ describe("persisted Proof Loop", () => {
     const earlyCompletionResponse = await completeProofWindow(new Request("http://test/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scenario: "keep", followupAnalysisId: followup.data.analysis.id, experience: "good", majorConfounder: false }),
+      body: JSON.stringify({ scenario: "keep", followupAnalysisId: followup.data.analysis.id, completedUses: 13, experience: "good", majorConfounder: false }),
     }), { params: Promise.resolve({ id: windowPayload.data.id }) });
     expect(earlyCompletionResponse.status).toBe(409);
 
     const completionResponse = await completeProofWindow(new Request("http://test/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ scenario: "keep", followupAnalysisId: followup.data.analysis.id, experience: "good", majorConfounder: false, demoTimeJump: true }),
+      body: JSON.stringify({ scenario: "keep", followupAnalysisId: followup.data.analysis.id, completedUses: 13, experience: "good", majorConfounder: false, demoTimeJump: true }),
     }), { params: Promise.resolve({ id: windowPayload.data.id }) });
     const completion = await json<{ receipt: { id: string; baselineAnalysisId: string; followupAnalysisId: string; verdict: string; consentToAggregate: boolean; origin: string } }>(completionResponse);
     expect(completion.data.receipt).toMatchObject({
@@ -110,6 +110,13 @@ describe("persisted Proof Loop", () => {
       const live = await liveResponse.json() as { ok: boolean; error: { code: string } };
       expect(liveResponse.status).toBe(503);
       expect(live).toMatchObject({ ok: false, error: { code: "MISSING_CREDENTIAL" } });
+      expect((await demoRepository.coverage()).storedAnalyses).toBe(0);
+
+      const implicitFallbackForm = new FormData();
+      implicitFallbackForm.set("file", file);
+      const implicitFallbackResponse = await uploadAnalysis(new Request("http://test/api/skin-analysis/upload", { method: "POST", body: implicitFallbackForm }));
+      expect(implicitFallbackResponse.status).toBe(503);
+      expect(await implicitFallbackResponse.json()).toMatchObject({ ok: false, error: { code: "MISSING_CREDENTIAL" } });
       expect((await demoRepository.coverage()).storedAnalyses).toBe(0);
 
       const fallbackForm = new FormData();

@@ -499,7 +499,7 @@ function ProgressStep({ state, setState, openReceipt }: { state: DemoState; setS
       const completionResponse = await fetch(`/api/proof-windows/${encodeURIComponent(state.proofWindowId)}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenario: state.scenario, followupAnalysisId: payload.data.analysis.id, experience: state.experience, majorConfounder: state.confounder, demoTimeJump: state.timeJumped }),
+        body: JSON.stringify({ scenario: state.scenario, followupAnalysisId: payload.data.analysis.id, completedUses: 13, experience: state.experience, majorConfounder: state.confounder, demoTimeJump: state.timeJumped }),
       });
       const completion = await completionResponse.json() as ApiResponse<{ receipt: ProofReceiptRecord; persistence: "memory" | "supabase" }>;
       if (!completionResponse.ok || !completion.ok || !completion.data) throw new Error(completion.error?.message || "The ProofReceipt could not be generated.");
