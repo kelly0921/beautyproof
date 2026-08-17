@@ -7,6 +7,15 @@
     "nodejs_compat",
     "global_fetch_strictly_public"
   ],
+  "secrets": {
+    "required": [
+      "BEAUTYPROOF_SESSION_SECRET",
+      "NEXT_PUBLIC_APP_URL",
+      "SUPABASE_SECRET_KEY",
+      "SUPABASE_URL",
+      "YOUCAM_API_KEY"
+    ]
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

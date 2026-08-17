@@ -9,10 +9,11 @@ const original = {
 };
 
 function clearSupabaseEnvironment() {
-  delete process.env.SUPABASE_URL;
-  delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-  delete process.env.SUPABASE_SECRET_KEY;
-  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const mutableEnvironment = process.env as Partial<NodeJS.ProcessEnv>;
+  delete mutableEnvironment.SUPABASE_URL;
+  delete mutableEnvironment.NEXT_PUBLIC_SUPABASE_URL;
+  delete mutableEnvironment.SUPABASE_SECRET_KEY;
+  delete mutableEnvironment.SUPABASE_SERVICE_ROLE_KEY;
 }
 
 afterEach(() => {

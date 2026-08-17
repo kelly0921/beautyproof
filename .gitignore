@@ -14,3 +14,8 @@ playwright-report/
 .vercel/
 .open-next/
 .wrangler/
+
+# Local hackathon workflow state and generated visual-review evidence.
+.devpost-hackathon-state.json
+artifacts/
+.tmp-workers-types/
