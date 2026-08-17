@@ -65,6 +65,12 @@ export default async function AppProofDetailPage({ params, searchParams }: { par
     {demoMode && campaign ? <DemoProgress activeStep={5} detail="Completion earns the reward regardless of whether the result is keep, swap, or inconclusive." role="consumer" title="Review the receipt and reward" /> : null}
     <Link className="app-back-link" href="/app/proofs">← Proof library</Link>
     {campaign ? <div className="app-receipt-sponsored-banner"><span className="app-sponsored-badge">Sponsored Proof Trial</span><div><strong>{campaign.title}</strong><small>Campaign enrollment {enrollment?.id}</small></div></div> : null}
+    {campaign && reward ? <section className="app-completion-celebration">
+      <div className="app-completion-mark" aria-hidden="true">✓</div>
+      <div className="app-completion-copy"><p className="app-kicker">ProofWindow complete · outcome neutral</p><h1>Reward {reward.status} for completing the ProofWindow.</h1><p>The protocol—not the verdict—earned this reward. Your <span className={`app-verdict app-verdict-${receipt.verdict}`}>{receipt.verdict}</span> result remains visible and honest.</p></div>
+      <aside><span>{campaign.rewardLabel}</span><strong>{reward.status}</strong><small>Prototype credit ledger · no funds moved</small><div aria-label="Reward path: pending, earned, issued in demo" className="app-reward-rail" data-status={reward.status}><i>Pending</i><b>→</b><i>Earned</i><b>→</b><i>Issued</i></div></aside>
+    </section> : null}
+    <div className="app-receipt-introduction"><div><p className="app-kicker">Standardized evidence label</p><h2>Now scan the proof, not just the verdict.</h2></div><span>Formula · baseline · change · adherence · quality · origin · limitations</span></div>
     <section className="app-receipt-card">
       <header><div><span className="app-receipt-wordmark">BeautyProof</span><small>ProofReceipt · {receipt.id.slice(0, 8).toUpperCase()}</small></div><div className={`app-verdict app-verdict-${receipt.verdict}`}>{receipt.verdict}</div></header>
       <p className="app-kicker">Personal cosmetic observation</p><h1>{product.name}</h1><p className="app-receipt-formula">{formula.versionLabel} · fingerprint {formula.fingerprint}</p>
@@ -80,7 +86,6 @@ export default async function AppProofDetailPage({ params, searchParams }: { par
     </section>
     <section className="app-receipt-source-note"><div><p className="app-kicker">Where this information came from</p><h2>Measurement and context stay separate.</h2><p><strong>Skin measurements:</strong> {measurementOrigin}. <strong>Product, price, formula, claims, and campaign:</strong> curated fictional BeautyProof prototype data. <strong>Public network:</strong> {receipt.consentToAggregate ? "separately consented" : "still private"}.</p></div><Link href="/app/data-sources">See all data sources →</Link></section>
     <ReceiptActions data={shareData} />
-    {campaign && reward ? <section className="app-reward-earned"><div><span>✓</span><div><p className="app-kicker">Outcome-neutral reward</p><h2>Reward {reward.status} for completing the ProofWindow.</h2><p>This reward does not depend on whether the result was positive, negative, or inconclusive.</p></div></div><aside><strong>{campaign.rewardLabel}</strong><span>{reward.status}</span><small>Prototype credit ledger · no funds moved</small></aside></section> : null}
     <ReceiptConsentButton campaignId={campaign?.id} demoMode={demoMode} initiallyConsented={receipt.consentToAggregate} receiptId={receipt.id} receiptOrigin={receipt.origin} />
   </div>;
 }

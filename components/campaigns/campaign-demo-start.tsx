@@ -50,15 +50,43 @@ export function CampaignDemoStart({ campaign, coverage, historicalCount, current
   const campaignActive = campaign.status === "active";
 
   return <main className="guided-demo-experience">
+    <section aria-labelledby="beautyproof-model-shift" className="guided-paradigm-shift">
+      <div className="guided-paradigm-copy">
+        <p className="guided-paradigm-kicker">BeautyProof · proof campaigns</p>
+        <h1 id="beautyproof-model-shift">Brands fund proof,<br /><em>not praise.</em></h1>
+        <p>Traditional reviews collapse every formula, starting condition, and outcome into one star rating. BeautyProof starts with a baseline and rewards completion of a defined observation—not a positive verdict.</p>
+        <div className="guided-paradigm-actions">
+          <a className="guided-primary-action" href="#funded-campaign">See the funded proof loop <span>↓</span></a>
+          <span>One product · one claim · one standardized receipt</span>
+        </div>
+      </div>
+
+      <div aria-label="Traditional review model compared with BeautyProof" className="guided-model-contrast">
+        <article className="traditional">
+          <span>Traditional review loop</span>
+          <strong>Buy</strong><i>→</i><strong>Rate</strong><i>→</i><strong>Context disappears</strong>
+          <small>Formula, baseline, adherence, and limitations are usually missing.</small>
+        </article>
+        <div className="guided-model-divider"><span>recompiled</span><i>→</i></div>
+        <article className="beautyproof">
+          <span>BeautyProof model</span>
+          <strong>Match</strong><i>→</i><strong>Complete</strong><i>→</i><strong>ProofReceipt</strong>
+          <small>Exact formula, starting score, protocol, outcome, and origin stay attached.</small>
+        </article>
+      </div>
+
+      <footer><strong>Reviews begin with a baseline.</strong><span>Outcome-neutral rewards · formula-locked evidence · separate public consent</span></footer>
+    </section>
+
     <DemoProgress activeStep={1} detail={campaignActive ? "The funded gap is live. Continue into the matching consumer experience." : "Aster Vale chooses one measurable gap and funds completion—not praise."} role="brand" title={campaignActive ? "Continue to consumer match" : "Activate the campaign"} />
 
     <section className="guided-data-disclosure"><strong>Demo data disclosure</strong><span>Aster Vale and DewSignal are fictional. Background ProofReceipts are synthetic, and the reliable judge baseline is a simulated YouCam-format fixture.</span><small>Only the live upload path creates real YouCam user evidence.</small></section>
 
-    <section className="guided-demo-stage">
+    <section className="guided-demo-stage" id="funded-campaign">
       <header className="guided-demo-heading">
         <div><span className="guided-screen-number">01</span><div><p>Brand workspace</p><span>{campaignActive ? "Campaign active" : "Campaign draft"}</span></div></div>
-        <h1>Fund one missing proof gap.</h1>
-        <p>The formula changed, so the old evidence stays historical. Aster Vale can now fund new observations for the exact 2026 formula.</p>
+        <h1>Turn one claim into an evidence brief.</h1>
+        <p>The formula changed, so the old evidence stays historical. Aster Vale funds new observations for the exact 2026 formula and rewards completion—not sentiment.</p>
       </header>
 
       <div className="guided-demo-grid">
@@ -89,13 +117,19 @@ export function CampaignDemoStart({ campaign, coverage, historicalCount, current
         <aside className="guided-action-panel">
           <div><p className="guided-action-kicker">Your action</p><h2>{campaignActive ? "Continue as the matching consumer." : "Activate the funded campaign."}</h2><p>{campaignActive ? "The campaign is already live. The next screen switches clearly into the consumer app." : "This makes the opportunity available to a matching consumer. The next screen switches clearly into the consumer app."}</p></div>
           <button className="guided-primary-action" disabled={status === "saving" || status === "resetting"} onClick={begin} type="button">{status === "saving" ? "Activating…" : campaign.status === "active" ? "Continue to consumer match" : "Activate campaign and continue"}<span>→</span></button>
-          <div className="guided-scenario-control"><span>Demo outcome</span><div>{(["keep", "swap", "inconclusive"] as Scenario[]).map((value) => <button aria-pressed={scenario === value} className={scenario === value ? "selected" : ""} key={value} onClick={() => setScenario(value)} type="button">{value}</button>)}</div><small>The reward stays the same in every scenario.</small></div>
           <div className="guided-formula-reset"><span>Formula reset</span><div><strong>{historicalCount}</strong><small>historical receipts<br />excluded</small><i>→</i><strong>{currentCount}</strong><small>current-formula<br />seed evidence</small></div></div>
-          <button className="guided-reset-action" disabled={status === "saving" || status === "resetting"} onClick={reset} type="button">{status === "resetting" ? "Resetting…" : "Reset demo data"}</button>
           {status === "error" ? <small className="guided-error" role="alert">The demo could not continue. Please try again.</small> : null}
         </aside>
       </div>
     </section>
+
+    <details className="guided-presenter-controls">
+      <summary><span>Presenter controls</span><strong>Choose the demo verdict or reset the fixture</strong></summary>
+      <div>
+        <div className="guided-scenario-control"><span>Simulated outcome</span><div>{(["keep", "swap", "inconclusive"] as Scenario[]).map((value) => <button aria-pressed={scenario === value} className={scenario === value ? "selected" : ""} key={value} onClick={() => setScenario(value)} type="button">{value}</button>)}</div><small>The shopper earns the same reward in every valid completion scenario.</small></div>
+        <button className="guided-reset-action" disabled={status === "saving" || status === "resetting"} onClick={reset} type="button">{status === "resetting" ? "Resetting…" : "Reset demo data"}</button>
+      </div>
+    </details>
 
     <p className="guided-demo-boundary">Cosmetic observation and decision support—not diagnosis, clinical research, causal proof, or real financing.</p>
   </main>;

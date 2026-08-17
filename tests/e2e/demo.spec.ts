@@ -15,7 +15,11 @@ test("judge completes the outcome-neutral sponsored Proof Campaign loop", async 
 
   await expect(page.getByText("BeautyProof guided demo", { exact: true })).toBeVisible();
   await expect(page.getByText("1 / 6", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Fund one missing proof gap/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Brands fund proof/i })).toBeVisible();
+  await expect(page.getByText("Reviews begin with a baseline.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Traditional review loop", { exact: true })).toBeVisible();
+  await expect(page.getByText("BeautyProof model", { exact: true })).toBeVisible();
+  await expect(page.locator(".guided-presenter-controls")).toBeVisible();
   await expect(page.getByText(/Barrier repair blocked/i)).toBeVisible();
   await page.getByRole("button", { name: /Activate campaign/i }).click();
 
@@ -71,4 +75,35 @@ test("judge completes the outcome-neutral sponsored Proof Campaign loop", async 
   await expect(page.getByText(/Campaign coverage updated/i)).toBeVisible();
   await expect(page.getByText(/Rewards earned/i)).toBeVisible();
   await expect(page.getByText("Shopper ProofMap", { exact: true }).locator("..")).toContainText("0 real · 1 demo");
+});
+
+test("mobile judge path earns an inconclusive reward before public contribution", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const resetResponse = await page.request.post("/api/demo/reset");
+  expect(resetResponse.ok()).toBe(true);
+  await page.goto("/demo");
+
+  const controls = page.locator(".guided-presenter-controls");
+  await controls.locator("summary").click();
+  await page.getByRole("button", { name: "inconclusive", exact: true }).click();
+  await page.getByRole("button", { name: /Activate campaign|Continue to consumer match/i }).click();
+
+  await page.getByRole("checkbox", { name: /I understand this is simulated demo data/i }).check();
+  await page.getByRole("button", { name: /Check campaign eligibility/i }).click();
+  await expect(page.getByRole("heading", { name: "You qualify" })).toBeVisible();
+  await expect(page.getByText(/Your starting moisture raw score is 54.2/i)).toBeVisible();
+  await page.getByRole("checkbox", { name: /I accept the sponsored Proof Trial terms/i }).check();
+  await page.getByRole("button", { name: /Enroll.*pending/i }).click();
+  await page.getByRole("button", { name: /Start sponsored 14-day ProofWindow/i }).click();
+
+  await page.getByRole("button", { name: /Save check-in/i }).click();
+  await page.getByRole("button", { name: /Demo time jump/i }).click();
+  await page.getByRole("button", { name: /Use simulated demo follow-up/i }).click();
+
+  await expect(page).toHaveURL(/\/app\/proofs\//);
+  await expect(page.getByRole("heading", { name: /Reward earned for completing the ProofWindow/i })).toBeVisible();
+  await expect(page.locator(".app-completion-celebration").getByText("inconclusive", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /add demo receipt/i })).toBeVisible();
+  const dimensions = await page.evaluate(() => ({ clientWidth: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
+  expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
 });

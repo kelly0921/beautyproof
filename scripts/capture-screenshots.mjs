@@ -84,7 +84,7 @@ try {
   await page.goto(`${baseUrl}/demo`, { waitUntil: "networkidle" });
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: "networkidle" });
-  await page.getByRole("heading", { name: /Fund one missing proof gap/i }).waitFor();
+  await page.getByRole("heading", { name: /Brands fund proof/i }).waitFor();
   await capture("01-brand-funded-proof-gap.png");
 
   await page.getByRole("button", { name: /Activate campaign|Continue to consumer match/i }).click();

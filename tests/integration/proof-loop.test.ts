@@ -94,7 +94,8 @@ describe("persisted Proof Loop", () => {
 
   it("surfaces missing live credentials unless cached fallback was explicitly allowed", async () => {
     const originalKey = process.env.YOUCAM_API_KEY;
-    delete process.env.YOUCAM_API_KEY;
+    const mutableEnvironment = process.env as Partial<NodeJS.ProcessEnv>;
+    delete mutableEnvironment.YOUCAM_API_KEY;
     try {
       const bytes = new Uint8Array(24);
       bytes.set([0x89, 0x50, 0x4e, 0x47], 0);
@@ -127,7 +128,7 @@ describe("persisted Proof Loop", () => {
       expect(fallback.data).toMatchObject({ analysis: { origin: "synthetic" }, fallbackReason: "MISSING_CREDENTIAL" });
       expect((await demoRepository.coverage()).storedAnalyses).toBe(1);
     } finally {
-      if (originalKey === undefined) delete process.env.YOUCAM_API_KEY;
+      if (originalKey === undefined) delete mutableEnvironment.YOUCAM_API_KEY;
       else process.env.YOUCAM_API_KEY = originalKey;
     }
   });
